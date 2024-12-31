@@ -170,7 +170,7 @@ export default class AdvancedSearch extends React.Component<IAdvancedSearchProps
           </form>
         </header>
         <section>
-          <DateRangeFilter onFilterChange={(e)=>{}}></DateRangeFilter>
+          {/* <DateRangeFilter onFilterChange={(e)=>{}}></DateRangeFilter> */}
         </section>
         <main className="container mt-3">
           <section className="row">
