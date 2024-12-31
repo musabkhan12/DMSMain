@@ -11,7 +11,8 @@ export const DateRangeFilter: React.FC<IDateRangeFilterProps> = ({ onFilterChang
      // Generate filter query based on input
      const generateFilter = (): string => {
         if (startDate && endDate) {
-            return `LastModifiedTime:Range(${startDate}..${endDate})`;
+            // return `LastModifiedTime:Range(${startDate}..${endDate})`;
+            return `LastModifiedTime>=${startDate} AND LastModifiedTime<=${endDate}`;
         } else if (startDate) {
             return `LastModifiedTime>=${startDate}`;
         } else if (endDate) {

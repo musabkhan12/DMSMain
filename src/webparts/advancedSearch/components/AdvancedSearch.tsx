@@ -123,8 +123,10 @@ export default class AdvancedSearch extends React.Component<IAdvancedSearchProps
 
   }
 
-  handleDateTimeFilter=(flter:string)=>{
-
+  handleDateTimeFilter=(filter:string)=>{
+  
+     this.setState({searchfilter:filter });
+     this.runSearch(this.state.searchtext,filter,this.state.searchpath,this.state.searchqueryRefiners,this.state.searchRefinerFilters);
     
 
   }
@@ -170,7 +172,7 @@ export default class AdvancedSearch extends React.Component<IAdvancedSearchProps
           </form>
         </header>
         <section>
-          {/* <DateRangeFilter onFilterChange={(e)=>{}}></DateRangeFilter> */}
+          <DateRangeFilter onFilterChange={(e)=>this.handleDateTimeFilter(e)}></DateRangeFilter>
         </section>
         <main className="container mt-3">
           <section className="row">
