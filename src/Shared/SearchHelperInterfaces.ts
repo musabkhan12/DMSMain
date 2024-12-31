@@ -1,3 +1,5 @@
+import { SearchRequest } from "@microsoft/microsoft-graph-types"
+
 export interface ISearchHitResource {
     "@odata.type": string
     size: number
@@ -57,3 +59,7 @@ export interface ISearchHitResource {
     listItemUniqueId: string
   }
   
+  export interface ISearchQuery
+  {
+    requests:SearchRequest[];
+  }
