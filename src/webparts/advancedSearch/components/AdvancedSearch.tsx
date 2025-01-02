@@ -11,6 +11,7 @@ import { ISearchHitResource } from '../../../Shared/SearchHelperInterfaces';
 import { SearchAggregation } from '@microsoft/microsoft-graph-types';
 import { DMSEntityConfigurationHelper } from '../../../Shared/DMSEntityConfigurationHelper';
 import { DateRangeFilter } from './DateRangeFilter';
+import { DMSEntitySearchTreeView } from './DMSEntitySearchFilter';
 // import { DateRangeFilter } from './DateRangeFilter';
 
 export interface IAdvancedSearchState {   
@@ -52,14 +53,15 @@ export default class AdvancedSearch extends React.Component<IAdvancedSearchProps
     let searchpathfromurl=getUrlParameter("searchpath");
     _searchquery=(searchqueryfromurl)?decodeURIComponent(searchqueryfromurl):this.state.searchfilter;
     _searchpath=(searchpathfromurl)?decodeURIComponent(searchpathfromurl):this.state.searchpath;
-    let dmsentityconfig=new DMSEntityConfigurationHelper(this.props.context);
+    //let dmsentityconfig=new DMSEntityConfigurationHelper(this.props.context);
     //let props=await dmsentityconfig.GetActiveEntityListsAndColumns();
-    dmsentityconfig.GetActiveEntityListsAndColumns().then(props=>{
-      let qrefiners=props.map(prp=>prp.SearchMappedManagedProperty);
-        this.setState({searchqueryRefiners:qrefiners})
-        this.runSearch(_searchquery,"",_searchpath,qrefiners,this.state.searchRefinerFilters);
+    // dmsentityconfig.GetActiveEntityListsAndColumns().then(props=>{
+    //   let qrefiners=props.map(prp=>prp.SearchMappedManagedProperty);
+    //     this.setState({searchqueryRefiners:qrefiners})
+    //     this.runSearch(_searchquery,"",_searchpath,qrefiners,this.state.searchRefinerFilters);
 
-    })
+    // })
+    this.runSearch(_searchquery,"",_searchpath,this.state.searchqueryRefiners,this.state.searchRefinerFilters);
       
    }
 
@@ -178,6 +180,8 @@ export default class AdvancedSearch extends React.Component<IAdvancedSearchProps
           <section className="row">
 
           <section className="col-4">
+          <DMSEntitySearchTreeView context={this.props.context} onFieldSelect={(fld)=>{ let selfld=this.state.searchqueryRefiners;selfld.push(fld);this.setState({searchqueryRefiners:selfld}); this.runSearch(this.state.searchtext,this.state.searchfilter,this.state.searchpath,selfld,this.state.searchRefinerFilters); }}> </DMSEntitySearchTreeView> 
+
           <div>
             <h5>Refiners</h5>
             {this.state.searchRefiners?.map(refiner => (

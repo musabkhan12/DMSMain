@@ -3,6 +3,9 @@
 import { BaseWebPartContext, WebPartContext } from "@microsoft/sp-webpart-base";
 import { SPFI } from "@pnp/sp";
 import { getSP } from "../webparts/dmsMusaib/loc/pnpjsConfig";
+import { IListInfo } from "@pnp/sp/lists";
+import "@pnp/sp/sites";
+
 
 
 ///
@@ -10,6 +13,7 @@ import { getSP } from "../webparts/dmsMusaib/loc/pnpjsConfig";
 //Constants
 
 export const LIST_TITLE_DMSEntitySitesMaster="MasterSiteURL";
+export const LIST_TITLE_DMSFolderMaster="DMSFolderMaster";
 export const LIST_TITLE_DMSEntityDocumentLibs="DMSPreviewFormMaster";
 
 //Interface 
@@ -23,9 +27,22 @@ export interface IDMSEntity
     FileMasterList?:string; 
 }
 
+export interface IDMSEntityDocLib
+{
+    Title?:string;
+    // SiteID?:string;
+    ID?:number;  
+    SiteTitle?:string;
+    DocumentLibraryName?:string;
+
+}
+
 export interface IDMSEntityList
 {
     ColumnName?:string;
+    ColumnType?:string;
+    SiteName?:string;
+    DocumentLibraryName?:string;
     SearchMappedManagedProperty?:string;
     ID?:number;  
 }
@@ -48,6 +65,19 @@ export class DMSEntityConfigurationHelper
 
     }
 
+    
+    
+
+    GetDocLibs=async(siteid:string):Promise<IListInfo[]>=>
+    {
+        
+        const subsiteWeb = await this.sp.site.openWebById(siteid);
+        const libraries = await subsiteWeb.web.lists
+        .select('ID', 'Title', 'BaseTemplate')
+        .filter("BaseTemplate eq 101 and Hidden eq false")();
+        return libraries;
+    }
+
     GetActiveEntityListsAndColumns=async():Promise<IDMSEntityList[]>=>
     {
         let actent=await this.GetActivEnitities();
@@ -65,6 +95,53 @@ export class DMSEntityConfigurationHelper
          // Filter results based on SearchMappedManagedProperty
         return results.filter(ent => ent.SearchMappedManagedProperty);
     }
+
+    GetActiveEntityDocLibs=async():Promise<IDMSEntityDocLib[]>=>
+        {
+            let actent=await this.GetActivEnitities();
+               // Collect promises for fetching document libraries
+            let promises = actent.map(async (ent) => {
+                let doclibs= await this.sp.web.lists
+                    .getByTitle(LIST_TITLE_DMSFolderMaster)
+                    .items.select("SiteTitle", "ID", "DocumentLibraryName")
+                    .filter(`IsLibrary eq 1 and SiteTitle eq ${ent.Title}`)();
+                 return doclibs.map(d=>{
+                    let d1=d;
+                    d1['SiteID']=ent.SiteID;
+                    return d1;
+                })   
+
+            });
+    
+            // Resolve all promises and flatten the results
+            let results = (await Promise.all(promises)).flat();
+    
+             // Filter results based on SearchMappedManagedProperty
+            return results;
+        }
+
+        GetActiveEntityDocLibsBySiteId=async(sitetitle:string):Promise<IDMSEntityDocLib[]>=>
+        {
+            
+            let doclibs= await this.sp.web.lists
+                .getByTitle(LIST_TITLE_DMSFolderMaster)
+                .items.select("SiteTitle", "ID", "DocumentLibraryName")
+                .filter(`IsLibrary eq 1 and SiteTitle eq '${sitetitle}'`)();
+               
+            return doclibs
+        }
+
+        GetActiveEntityDocLibsSearchFields=async(sitetitle:string,doclibtitle:string):Promise<IDMSEntityList[]>=>
+        {
+            
+            let doclibsfields= await this.sp.web.lists
+                .getByTitle(LIST_TITLE_DMSEntityDocumentLibs)
+                .items.select("SiteName", "ID", "DocumentLibraryName", "ColumnName","ColumnType","SearchMappedManagedProperty")
+                .filter(`DocumentLibraryName eq '${doclibtitle}' and SiteName eq '${sitetitle}'`)();
+                
+            return doclibsfields.filter(d=>d.SearchMappedManagedProperty);
+        }
+
 }
 
 

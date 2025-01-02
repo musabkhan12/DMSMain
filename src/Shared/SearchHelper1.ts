@@ -150,7 +150,7 @@ export class GraphSearchHelper {
 
   public async searchAll(query: string, size: number = 100,refiners:string[]=[],refinerfilters:string[]=[]): Promise<SearchHitsContainer> {
     try {
-      const searchaggegators:AggregationOption[]=['webUrl','FileType'].concat(refiners).map(ref=>{return  ({
+      const searchaggegators:AggregationOption[]=[].concat(refiners).map(ref=>{return  ({
         "field": ref,
         "size": 100,
         "bucketDefinition": {
