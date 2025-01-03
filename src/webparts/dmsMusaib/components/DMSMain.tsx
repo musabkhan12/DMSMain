@@ -1,6 +1,6 @@
 declare global {
   interface Window {
-    managePermission:(DocumentLibraryName:string,SiteTilte:string , SiteID:string, folderName:any ,folderPath:any) => void;
+    managePermission:(DocumentLibraryName:string,SiteTilte:string , SiteID:string, folderName:any ,folderPath:any,externalFolder:any) => void;
     manageWorkflow:(DocumentLibraryName:string,SiteTilte:string , SiteID:string) => void;
     view:(message:string) => void;
     PreviewFile: (path: string, siteID: string, docLibName:any,  filemasterlist:any , filepreview:any) => void;
@@ -30,7 +30,8 @@ SiteTitle:"",
 DocumentLibraryName:"",
 SiteID:"",
 FolderName: "",
-FolderPath:""
+FolderPath:"",
+externalFolder:""
 }
 interface UploadFileProps {
   currentfolderpath: {
@@ -115,6 +116,7 @@ import { BaseWebPartContext } from "@microsoft/sp-webpart-base";
 import { GraphSearchHelper } from "../../../Shared/SearchHelper1";
 import { IDocumentDisplayFields } from "./DMSSearch/Interfaces";
 import { ISearchHitResource } from "../../../Shared/SearchHelperInterfaces";
+
 let Undo = require('../assets/Undo.svg');
 let sharewithmeicon = require('../assets/nodes.png')
 let recyclebin = require('../assets/recycle-bin.png')
@@ -170,6 +172,7 @@ let iscontribute = ""
 let isadmin = ""
 let mydatacard = ""
 let IsFolderDeligationUser=false;
+let IsExternal=false;
 let mydata: string[] = [];
 
 // start
@@ -434,7 +437,7 @@ const myrequestbuttonclick =()=>{
       const entityItems = await sp.web.lists
         .getByTitle("EntityDivisionDepartmentMappingMasterList")
         .items.select(
-          "Entitylookup/Title, Entitylookup/SiteURL", "Entitylookup/SiteID" ,
+          "Entitylookup/Title, Entitylookup/SiteURL", "Entitylookup/SiteID" ,"Entitylookup/IsExternal" ,
           "Devisionlookup/Title",
           "Departmentlookup/Title",
           "Devisionlookup/Active",
@@ -491,7 +494,8 @@ const myrequestbuttonclick =()=>{
           ParentFolderId,
           FolderPath,
           IsRename,
-          IsActive
+          IsActive,
+          External
         } = folderItem;
         if (SiteTitle) {
           const key = `${SiteTitle.trim()}::${Devision?.trim() || ""}::${
@@ -509,6 +513,7 @@ const myrequestbuttonclick =()=>{
                 ParentFolderId,
                 DocumentLibraryName,
                 IsActive,
+                External,
                 FolderName: Array.isArray(FolderName)
                   ? FolderName
                   : [FolderName],
@@ -524,12 +529,13 @@ const myrequestbuttonclick =()=>{
         const entityTitle = item.Entitylookup.Title;
         const siteURL = item.Entitylookup.SiteURL;
         const siteID = item.Entitylookup.SiteID;
-      
+        const isExternal = item.Entitylookup.IsExternal;
         if (!entitiesMap.has(entityTitle)) {
           entitiesMap.set(entityTitle, {
             siteURL: siteURL,
             entityTitle: entityTitle,
             siteID: siteID,
+            isExternal: isExternal,
             devisions: new Map(),
           });
         }
@@ -701,12 +707,14 @@ const myrequestbuttonclick =()=>{
 
           // Iterate over document libraries and populate the map with unique DocumentLibraryNames
           documentLibraries.forEach((item: any) => {
+              console.log("item is external",item.External);
            
             if (!uniqueDocLibs.has(item.DocumentLibraryName)) {
               uniqueDocLibs.set(item.DocumentLibraryName, {
                 folders: [],
                 folderPath: item.FolderPath, // Store FolderPath with other details
                 isActive: item.IsActive,
+                External: item.External
               });
             }
             uniqueDocLibs.get(item.DocumentLibraryName).folders.push(item);
@@ -773,6 +781,7 @@ const myrequestbuttonclick =()=>{
               handleNavigation(value.entityTitle, null , null , docLibName , null )
               toggleVisibility(folderList);
               getdoclibdata(data.folderPath , value.siteID , docLibName);
+              IsExternal=data.External;
               currentfolderpath = data.folderPath
               currentDocumentLibrary = docLibName;
               currentEntityURL = value.siteURL;
@@ -811,6 +820,7 @@ const myrequestbuttonclick =()=>{
 
             // Handle double-click to hide the folder list
             docLibElement.addEventListener("dblclick", (event) => {
+              IsExternal=data.External;
               event.stopPropagation();
               toggleVisibility(folderList, false);
             });
@@ -870,6 +880,7 @@ const myrequestbuttonclick =()=>{
                       console.log(currentDocumentLibrary , "currentDocumentLibrary")
                       console.log(currentFolder , "currentFolder")
                       console.log(parentfolder , "parentfolder")
+                      IsExternal=item.External;
                       console.log(currentfolderpath , "currentfolderpath");
                       handleNavigation(value.entityTitle, null , null , docLibName , folderName )
                       event.stopPropagation();
@@ -949,6 +960,7 @@ const myrequestbuttonclick =()=>{
             });
 
             docLibElement.addEventListener("click", (event) => {
+
               console.log(devisionValue, "devisionValue");
               event.stopPropagation();
               currentDocumentLibrary = docLibName;
@@ -1008,6 +1020,7 @@ const myrequestbuttonclick =()=>{
             departmentElement.appendChild(documentList);
 
             departmentElement.addEventListener("click", (event) => {
+         
               currentEntityURL = value.siteURL;
                     currentsiteID = value.siteID
                     currentEntity = value.entityTitle;
@@ -1016,6 +1029,11 @@ const myrequestbuttonclick =()=>{
                     currentDocumentLibrary = ''
                     currentFolder = ''
                     currentfolderpath = ''
+                    if(value.isExternal === "Yes"){
+                      IsExternal=true;
+                    }else{
+                      IsExternal=false;
+                    }
                   console.log("currentEntityURL", currentEntityURL);
                   console.log("currentsiteID", currentsiteID);
                   console.log("currentEntity", currentEntity);
@@ -1045,6 +1063,7 @@ const myrequestbuttonclick =()=>{
                     uniqueDocLibs.set(item.DocumentLibraryName, {
                       folders: [],
                       folderPath: item.FolderPath, // Store FolderPath
+                      External:item.External 
                     });
                   }
                   uniqueDocLibs
@@ -1085,6 +1104,7 @@ const myrequestbuttonclick =()=>{
                     currentDocumentLibrary = docLibName;
                     currentDepartment = departmentTitle;
                     currentfolderpath = data.folderPath,
+                    IsExternal=data.IsExternal
                     setcurrentSearchPath(RootsiteUrl + data.folderPath);
                     currentFolder =''
                     console.log(data, data  ,"data")
@@ -1120,6 +1140,7 @@ const myrequestbuttonclick =()=>{
                   });
 
                   docLibElement.addEventListener("dblclick", (event) => {
+                    IsExternal=data.IsExternal
                     event.stopPropagation();
                     toggleVisibility(folderList, false);
                   });
@@ -1162,7 +1183,7 @@ const myrequestbuttonclick =()=>{
                             currentDepartment = departmentTitle;
                             currentDocumentLibrary = docLibName;
                             currentFolder = folderName
-                  
+                            IsExternal=item.External
                           console.log("currentEntityURL", currentEntityURL);
                           console.log("currentEntity", currentEntity);
                           console.log("currentsiteID", currentsiteID);
@@ -1203,6 +1224,11 @@ const myrequestbuttonclick =()=>{
             });
 
             departmentElement.addEventListener("dblclick", (event) => {
+              if(value.isExternal === "Yes"){
+                IsExternal=true;
+              }else{
+                IsExternal=false
+              }
               event.stopPropagation();
               toggleVisibility(documentList, false);
             });
@@ -1252,6 +1278,7 @@ const myrequestbuttonclick =()=>{
                 docLibElement.appendChild(folderList);
 
                 docLibElement.addEventListener("click", (event) => {
+                
                   event.stopPropagation();
                   currentEntityURL = value.siteURL; // Use the SiteURL from entitiesMap
                   currentsiteID = value.siteID
@@ -1261,7 +1288,7 @@ const myrequestbuttonclick =()=>{
                   currentFolder=''
                   currentDocumentLibrary = item.DocumentLibraryName;
                   currentfolderpath = item.FolderPath;
-                  
+                  value.isExternal
                   setcurrentSearchPath(RootsiteUrl + item.folderPath);
                   console.log("currentEntityURL", currentEntityURL);
                   console.log("currentsiteID", currentsiteID);
@@ -1355,6 +1382,7 @@ const myrequestbuttonclick =()=>{
                                 currentFolder = folderName
                                 currentDepartment=''
                                 currentFolder = folderPath
+                                IsExternal=item.External;
                                 // currentfolderpath = item.FolderPath;
                                 parentfolder = parentFolderId
                                 console.log("currentEntityURL", currentEntityURL);
@@ -1415,6 +1443,7 @@ const myrequestbuttonclick =()=>{
           ///End: display all Document libraries under Devision directly if Department null with nested folder //////
 
           devisionElement.addEventListener("click", (event) => {
+           
             const breadcrumbElement=document.getElementById("breadcrumb");
             if(breadcrumbElement){
               breadcrumbElement.style.display="none";
@@ -1428,6 +1457,11 @@ const myrequestbuttonclick =()=>{
             currentDocumentLibrary = ''
             currentFolder =''
             currentfolderpath = ''
+            if(value.isExternal === "Yes"){
+              IsExternal=true
+            }else{
+              IsExternal=false
+            }
             console.log("currentEntityURL", currentEntityURL);
             console.log("currentsiteID", currentsiteID);
             console.log("currentEntity", currentEntity);
@@ -1451,6 +1485,11 @@ const myrequestbuttonclick =()=>{
           });
 
           devisionElement.addEventListener("dblclick", (event) => {
+            if(value.isExternal === "Yes"){
+              IsExternal=true
+            }else{
+              IsExternal=false
+            }
             event.stopPropagation();
             toggleVisibility(departmentList, false);
             // Toggle plus/minus icon
@@ -1460,6 +1499,7 @@ const myrequestbuttonclick =()=>{
 
         let clickTimer:any;
         titleElement.addEventListener("click" , async (event)=>{
+        
           if(entityclicktext !== ''){
      
             const breadcrumbElement=document.getElementById("breadcrumb");
@@ -1612,6 +1652,11 @@ const myrequestbuttonclick =()=>{
                 currentDocumentLibrary=""
                 currentFolder=""
                 currentfolderpath=""
+                if(value.isExternal === "Yes"){
+                  IsExternal=true
+                }else if(value.isExternal === "No"){
+                  IsExternal=false
+                }
                 console.log(value.entityTitle, "value");
                 console.log(currentsiteID, "currentsiteID");
                 console.log("currentEntityURL", currentEntityURL);
@@ -1763,6 +1808,11 @@ const myrequestbuttonclick =()=>{
               }
           
              
+            }
+            if(value.isExternal === "Yes"){
+              IsExternal=true
+            }else if(value.isExternal === "No"){
+              IsExternal=false
             }
             // Clear the single click timer
             clearTimeout(clickTimer);
@@ -2295,6 +2345,70 @@ const myrequestbuttonclick =()=>{
   const getdoclibdata = async (FolderPath: any , siteID:any , docLibName:any) => {
     setlistorgriddata('');
     
+
+    // main code i shere 
+    // try {
+    //   // Get the file object
+    //   let filePath = '/sites/AlRostmani/TestHub/DL1/PermissonTest1.doc'
+    //   const siteid = "3f7babac-3bce-478c-aa2b-1f7df7ed177f"
+    //   const testidsub2 = await sp.site.openWebById(siteid);
+
+    //     const file = testidsub2.web.getFileByServerRelativePath(filePath);
+    //     const item = await file.getItem();  
+    //     const itemDetails = await item.select("Editor/ID", "Editor/Title", "Editor/Id" ,"*").expand("Editor")()
+
+    //     console.log("itemDetails",itemDetails)
+    //     console.log("file detail is",file)
+    //     // Fetch historical versions
+    //     const historicalVersions = await file.versions
+    //       .select(
+    //         "ID",
+    //         "CheckInComment",
+    //         "Created",
+    //         "CreatedBy/Title",
+    //         "CreatedBy/Id",
+    //         "CreatedBy/Name",
+    //         "IsCurrentVersion",
+    //         "Size",
+    //         "Url",
+    //         "VersionLabel"
+    //       )
+    //       .expand("CreatedBy")();
+    
+    //     // Fetch current version details
+    //     const currentFileDetails = await file
+    //       .select(
+    //         "Name",
+    //         "Length",
+
+    //       )
+    //       .expand("Author"  )();
+    //       let currentVersionofitem:any = currentFileDetails;
+    //      console.log("currentFileDetails",currentFileDetails)
+    //     // Map current file details into the same structure as versions
+    //     const currentVersion = {
+    //       ID: historicalVersions.length + 1, // Current version appears last
+    //       VersionLabel: `${historicalVersions.length + 1}.0`, // Example label
+    //       CheckInComment: "N/A", // No check-in comment for current version
+    //       Created: itemDetails.Created,
+    //       CreatedBy: {
+    //         Title: itemDetails?.Editor?.Title,
+    //         Id:  itemDetails?.Editor?.ID,
+    //       },
+    //       IsCurrentVersion: true,
+    //       Size: currentFileDetails.Length,
+    //       Url: filePath,
+    //     };
+    
+    //     // Combine current version with historical versions
+    //     const allVersions = [...historicalVersions, currentVersion];
+    
+    //     console.log("All File Versions (Including Current):", allVersions);
+ 
+    //   } catch (error) {
+    //     console.error("Error fetching file versions:", error);
+    //     throw error;
+    //   }
     const noFileMessage = document.createElement("p");
     
     //  ismyrequordoclibforfilepreview = "getdoclibdata"
@@ -3740,10 +3854,171 @@ const createFileCardForDocumentLibrary=(file:any,fileIcon:any,siteID:string,IsHa
           <li onclick="shareFile('${file.UniqueId}','${siteID}','${FolderPath}','${file.Name}','DocumentLibrary','${file.MajorVersion}','${((file.Length as unknown as number) / (1024 * 1024)).toFixed(2)}','${file.ListItemAllFields.Status}','','${currentDocumentLibrary}')">
           <img src=${ShareFile} alt="Share"/> Share
           </li>  
+          
+          
+          <li onclick="versionHistory('${file.Name}', '${file.ServerRelativeUrl}', '${siteID}' ,'DocumentLibrary')">
+            <img src=${editIcon} alt="Preview"/>
+               Version History
+          </li>   
         </ul>
       `;
       card.appendChild(menu);
       return card;
+}
+
+
+// This function will call onclick of version history popup
+// @ts-ignore
+window.versionHistory=async(fileName:string,folderPath:string,siteId:string,flag:string)=>{
+  // main code i shere
+  console.log("fileName",fileName)
+  console.log("folderPath",folderPath)
+  console.log("siteId",siteId)
+  let filePath=""
+  if(flag === "DocumentLibrary"){
+    filePath=folderPath
+  }else{
+    filePath=`${folderPath}/${fileName}`
+  }
+  
+  try {
+    // Get the file object
+    // let filePath = '/sites/AlRostmani/TestHub/DL1/PermissonTest1.doc'
+    // const siteid = "3f7babac-3bce-478c-aa2b-1f7df7ed177f"
+    const testidsub2 = await sp.site.openWebById(siteId);
+
+      const file = testidsub2.web.getFileByServerRelativePath(filePath);
+      const item = await file.getItem();  
+      const itemDetails = await item.select("Editor/ID", "Editor/Title", "Editor/Id" ,"*").expand("Editor")()
+
+      console.log("itemDetails",itemDetails)
+      console.log("file detail is",file)
+      // Fetch historical versions
+      const historicalVersions = await file.versions
+        .select(
+          "ID",
+          "CheckInComment",
+          "Created",
+          "CreatedBy/Title",
+          "CreatedBy/Id",
+          "CreatedBy/Name",
+          "IsCurrentVersion",
+          "Size",
+          "Url",
+          "VersionLabel"
+        )
+        .expand("CreatedBy")();
+ 
+      // Fetch current version details
+      const currentFileDetails = await file
+        .select(
+          "Name",
+          "Length",
+
+        )
+        .expand("Author"  )();
+        let currentVersionofitem:any = currentFileDetails;
+       console.log("currentFileDetails",currentFileDetails)
+      // Map current file details into the same structure as versions
+      const currentVersion = {
+        ID: historicalVersions.length + 1, // Current version appears last
+        VersionLabel: `${historicalVersions.length + 1}.0`, // Example label
+        CheckInComment: "N/A", // No check-in comment for current version
+        Created: itemDetails.Created,
+        CreatedBy: {
+          Title: itemDetails?.Editor?.Title,
+          Id:  itemDetails?.Editor?.ID,
+        },
+        IsCurrentVersion: true,
+        Size: currentFileDetails.Length,
+        Url: filePath,
+      };
+ 
+      // Combine current version with historical versions
+      const allVersions = [...historicalVersions, currentVersion];
+ 
+      console.log("All File Versions (Including Current):", allVersions);
+
+  // Create the popup dynamically
+  const popupContainer = document.createElement("div");
+  popupContainer.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    width: 60%;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 20px;
+    overflow-y: auto;
+  `;
+
+  const popupHeader = document.createElement("div");
+  popupHeader.style.cssText = `
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+  `;
+  popupHeader.innerHTML = `
+    <span>Version History</span>
+    <span style="cursor: pointer; font-size: 1.2rem;" id="closePopup">x</span>
+  `;
+
+  const table = document.createElement("table");
+  table.style.cssText = `
+    width: 100%;
+    border-collapse: collapse;
+  `;
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th style="border-bottom: 2px solid #ccc; text-align: left; padding: 8px;">Version No</th>
+        <th style="border-bottom: 2px solid #ccc; text-align: left; padding: 8px;">Modified</th>
+        <th style="border-bottom: 2px solid #ccc; text-align: left; padding: 8px;">Modified By</th>
+        <th style="border-bottom: 2px solid #ccc; text-align: left; padding: 8px;">Expiring In</th>
+        <th style="border-bottom: 2px solid #ccc; text-align: left; padding: 8px;">Size</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${allVersions
+        .map(
+          (version) => `
+        <tr>
+          <td style="padding: 8px; border-bottom: 1px solid #eee;">${version.VersionLabel}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee;">${new Date(
+            version.Created
+          ).toLocaleString()}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee;">${version.CreatedBy.Title}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee;">Never expires</td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee;">${((version.Size as unknown as number) / (1024 * 1024)).toFixed(2)} MB</td>
+        </tr>
+      `
+        )
+        .join("")}
+    </tbody>
+  `;
+
+  popupContainer.appendChild(popupHeader);
+  popupContainer.appendChild(table);
+
+  document.body.appendChild(popupContainer);
+
+  // Close popup event
+  document.getElementById("closePopup")?.addEventListener("click", () => {
+    popupContainer.remove();
+  });
+
+
+    } catch (error) {
+      console.error("Error fetching file versions:", error);
+      throw error;
+    }
 }
   // Helper function to determine the file icon based on file extension
   // const getFileIcon = (fileName: string) => {
@@ -4251,116 +4526,228 @@ const createFileCardForDocumentLibrary=(file:any,fileIcon:any,siteID:string,IsHa
 
 //   };
 window.PreviewFile = function(path :any , SiteID:any , docLibName:any,flag:string , filepreviewurl){
-// console.log(docLibName , "docLibName")
-console.log(filepreviewurl , "filepreviewurl")
-console.log("path",path);
-const segments = path.split('/');
-// extarct the current entity start
-  const currentSubsite = segments[3]; 
-// end
-// Find the index of 'sites'
-const sitesIndex = segments.indexOf('sites');
-
-// If 'sites' is found and there are enough segments after it
-let myactualdoclib
-if (sitesIndex !== -1 && segments.length > sitesIndex + 3) {
-  myactualdoclib = segments[sitesIndex + 3];
-  console.log(myactualdoclib , "myactualdoclib")
-  // return segments[sitesIndex + 3];  // The document library is the 4th segment after 'sites'
-} else {
-  // return null;  // Return null if not enough segments are available
-}
-event.preventDefault()
-event.stopPropagation()
-const createpreviewdiv = document.createElement('div')
-createpreviewdiv.style.display = 'grid'
-const previewfileframe = document.createElement('iframe') 
-previewfileframe.id = 'filePreview'
-previewfileframe.style.width = '930px'
-previewfileframe.style.height = '500px'
-const librarydiv= document.getElementById('files-container')
-const createbutton = document.createElement('button')
-createbutton.textContent = 'Close File preivew';
-console.log("enter here in preview : ",path)
-const encodedFilePath = encodeURIComponent(path);
-console.log(encodedFilePath, "encodedFilePath");
-
-// Extract the parent folder correctly
-const parentFolder = path.substring(0, path.lastIndexOf('/'));
-console.log(parentFolder, "parentFolder");
-
-// Correctly encode the parent folder
-const encodedParentFolder = encodeURIComponent(parentFolder);
-
-// Get the base site URL
-const siteUrl = window.location.origin;
-console.log(siteUrl, "siteUrl");
-
-console.log(path , ".....path")
-if( ismyrequordoclibforfilepreview === "myRequest" || ismyrequordoclibforfilepreview  === "sharewithme" || ismyrequordoclibforfilepreview  === "sharewithothers"){
-  const previewUrl = filepreviewurl
-
+  // console.log(docLibName , "docLibName")
+  console.log(filepreviewurl , "filepreviewurl")
+  console.log("path",path);
+  const segments = path.split('/');
+  // extarct the current entity start
+    const currentSubsite = segments[3];
+  // end
+  // Find the index of 'sites'
+  const sitesIndex = segments.indexOf('sites');
+   
+  // If 'sites' is found and there are enough segments after it
+  let myactualdoclib
+  if (sitesIndex !== -1 && segments.length > sitesIndex + 3) {
+    myactualdoclib = segments[sitesIndex + 3];
+    console.log(myactualdoclib , "myactualdoclib")
+    // return segments[sitesIndex + 3];  // The document library is the 4th segment after 'sites'
+  } else {
+    // return null;  // Return null if not enough segments are available
+  }
+  event.preventDefault()
+  event.stopPropagation()
+  const createpreviewdiv = document.createElement('div')
+  createpreviewdiv.style.display = 'grid'
+  const previewfileframe = document.createElement('iframe')
+  previewfileframe.id = 'filePreview'
+  previewfileframe.style.width = '930px'
+  previewfileframe.style.height = '500px'
+  const librarydiv= document.getElementById('files-container')
+  const createbutton = document.createElement('button')
+  createbutton.textContent = 'Close File preivew';
+  console.log("enter here in preview : ",path)
+  const encodedFilePath = encodeURIComponent(path);
+  console.log(encodedFilePath, "encodedFilePath");
+   
+  // Extract the parent folder correctly
+  const parentFolder = path.substring(0, path.lastIndexOf('/'));
+  console.log(parentFolder, "parentFolder");
+   
+  // Correctly encode the parent folder
+  const encodedParentFolder = encodeURIComponent(parentFolder);
+   
+  // Get the base site URL
+  const siteUrl = window.location.origin;
+  console.log(siteUrl, "siteUrl");
+   
+  console.log(path , ".....path")
+  if( ismyrequordoclibforfilepreview === "myRequest" || ismyrequordoclibforfilepreview  === "sharewithme" || ismyrequordoclibforfilepreview  === "sharewithothers"){
+    const previewUrl = filepreviewurl
+   
+    console.log(previewUrl, "Generated preview URL");
+   
+    console.log("Generated Preview URL:", previewUrl);
+    if(previewUrl){
+      librarydiv.innerHTML = "";
+      previewfileframe.src = previewUrl;
+      previewfileframe.onload = () => {
+        console.log("Iframe has loaded");
+   
+        const checkAndHideButton = () => {
+          try {
+            const iframeDocument = previewfileframe.contentDocument || previewfileframe.contentWindow?.document;
+            if (iframeDocument) {
+              const button = iframeDocument.getElementById("OneUpCommandBar") as HTMLElement;
+              const excelToolbar = iframeDocument.getElementById("m_excelEmbedRenderer_m_ewaEmbedViewerBar") as HTMLElement;
+              if(excelToolbar){
+                excelToolbar.style.display= "none"
+              }
+              if (button) {
+                console.log("Hiding the OneUpCommandBar element");
+                button.style.display = "none";
+   
+   
+                // spinner.style.display = "none";
+                previewfileframe.style.display = "block";
+   
+   
+              } else {
+                console.log("OneUpCommandBar not found, rechecking...");
+              }
+             
+              const helpbutton = iframeDocument.getElementById("m_excelEmbedRenderer_m_ewaEmbedViewerBar") as HTMLElement;
+              if(helpbutton){
+                helpbutton.style.display = "none"
+              }
+            }
+          } catch (error) {
+            console.error("Error accessing iframe content:", error);
+          }
+   
+   
+          setTimeout(checkAndHideButton, 100);
+        };
+   
+   
+        checkAndHideButton();
+      };
+      createpreviewdiv.appendChild(createbutton)
+      createpreviewdiv.appendChild(previewfileframe);
+      librarydiv.appendChild(createpreviewdiv)
+      createbutton.addEventListener('click', function() {
+        event.preventDefault()
+        event.stopPropagation()
+   
+        if(ismyrequordoclibforfilepreview === "myRequest"){
+          myRequest();
+        }
+        if(ismyrequordoclibforfilepreview === "sharewithme"){
+          ShareWithMe();
+        }
+        if(ismyrequordoclibforfilepreview === "sharewithothers"){
+          ShareWithOther();
+        }
+        // if(flag === "shareWithMe"){
+        //     ShareWithMe(null,null);
+        // }
+        // if(flag === "documentLibrary"){
+        //   getdoclibdata(currentfolderpath , currentsiteID , currentDocumentLibrary)
+        // }
+       
+    });
+    }
+  }
+  if(ismyrequordoclibforfilepreview === "getdoclibdata"){
+  // Generate the correct preview URL
+  const previewUrl = `${siteUrl}/sites/IntranetUAT/${currentEntity}/${myactualdoclib}/Forms/AllItems.aspx?id=${path}&parent=${encodedParentFolder}`;
+  //  const previewUrl = `${siteUrl}/sites/AlRostmanispfx2/${currentEntity}/${myactualdoclib}/Forms/AllItems.aspx?id=${path}&parent=${encodedParentFolder}`;
+    // const previewUrl = `${siteUrl}/sites/AlRostmani/${currentSubsite}/${myactualdoclib}/Forms/AllItems.aspx?id=${path}&parent=${encodedParentFolder}`;
+  // const previewUrl = `${siteUrl}/sites/SPFXDemo/${currentEntity}/${myactualdoclib}/Forms/AllItems.aspx?id=${path}&parent=${encodedParentFolder}`;
+   
   console.log(previewUrl, "Generated preview URL");
- 
-  console.log("Generated Preview URL:", previewUrl);
-  if(previewUrl){
-    librarydiv.innerHTML = "";
-    previewfileframe.src = previewUrl;
-    createpreviewdiv.appendChild(createbutton)
-    createpreviewdiv.appendChild(previewfileframe);
-    librarydiv.appendChild(createpreviewdiv)
-    createbutton.addEventListener('click', function() {
-      event.preventDefault()
-      event.stopPropagation()
- 
-      if(ismyrequordoclibforfilepreview === "myRequest"){
-        myRequest();
-      }
-      if(ismyrequordoclibforfilepreview === "sharewithme"){
-        ShareWithMe();
-      }
-      if(ismyrequordoclibforfilepreview === "sharewithothers"){
-        ShareWithOther();
-      }
-      // if(flag === "shareWithMe"){
-      //     ShareWithMe(null,null);
-      // }
-      // if(flag === "documentLibrary"){
-      //   getdoclibdata(currentfolderpath , currentsiteID , currentDocumentLibrary)
-      // }
-      
-  });
+   
+    console.log("Generated Preview URL:", previewUrl);
+    if(previewUrl){
+      librarydiv.innerHTML = "";
+      previewfileframe.src = previewUrl;
+      previewfileframe.onload = () => {
+        console.log("Iframe has loaded");
+   
+        const checkAndHideButton = () => {
+          try {
+            const iframeDocument = previewfileframe.contentDocument || previewfileframe.contentWindow?.document;
+            if (iframeDocument) {
+              const button = iframeDocument.getElementById("OneUpCommandBar") as HTMLElement;
+              const excelToolbar = iframeDocument.getElementById("m_excelEmbedRenderer_m_ewaEmbedViewerBar") as HTMLElement;
+              if(excelToolbar){
+                excelToolbar.style.display= "none"
+              }
+              if (button) {
+                console.log("Hiding the OneUpCommandBar element");
+                button.style.display = "none";
+   
+   
+                // spinner.style.display = "none";
+                previewfileframe.style.display = "block";
+   
+   
+              } else {
+                console.log("OneUpCommandBar not found, rechecking...");
+              }
+             
+              const helpbutton = iframeDocument.getElementById("m_excelEmbedRenderer_m_ewaEmbedViewerBar") as HTMLElement;
+              if(helpbutton){
+                helpbutton.style.display = "none"
+              }
+            }
+          } catch (error) {
+            console.error("Error accessing iframe content:", error);
+          }
+   
+   
+          setTimeout(checkAndHideButton, 100);
+        };
+   
+   
+        checkAndHideButton();
+      };
+      createpreviewdiv.appendChild(createbutton)
+      createpreviewdiv.appendChild(previewfileframe);
+      librarydiv.appendChild(createpreviewdiv)
+      createbutton.addEventListener('click', function() {
+        event.preventDefault()
+        event.stopPropagation()
+   
+        // if(flag === "shareWithMe"){
+        //     ShareWithMe(null,null);
+        // }
+        // if(flag === "documentLibrary"){
+        //   getdoclibdata(currentfolderpath , currentsiteID , currentDocumentLibrary)
+        // }
+        getdoclibdata(currentfolderpath , currentsiteID , currentDocumentLibrary)
+    });
+    }
   }
-}
-if(ismyrequordoclibforfilepreview === "getdoclibdata"){
-// Generate the correct preview URL
-// const previewUrl = `${siteUrl}/sites/IntranetUAT/${currentEntity}/${myactualdoclib}/Forms/AllItems.aspx?id=${path}&parent=${encodedParentFolder}`;
-//  const previewUrl = `${siteUrl}/sites/AlRostmanispfx2/${currentEntity}/${myactualdoclib}/Forms/AllItems.aspx?id=${path}&parent=${encodedParentFolder}`;
-  const previewUrl = `${siteUrl}/sites/AlRostmani/${currentSubsite}/${myactualdoclib}/Forms/AllItems.aspx?id=${path}&parent=${encodedParentFolder}`;
-// const previewUrl = `${siteUrl}/sites/SPFXDemo/${currentEntity}/${myactualdoclib}/Forms/AllItems.aspx?id=${path}&parent=${encodedParentFolder}`;
-
-console.log(previewUrl, "Generated preview URL");
- 
-  console.log("Generated Preview URL:", previewUrl);
-  if(previewUrl){
-    librarydiv.innerHTML = "";
-    previewfileframe.src = previewUrl;
-    createpreviewdiv.appendChild(createbutton)
-    createpreviewdiv.appendChild(previewfileframe);
-    librarydiv.appendChild(createpreviewdiv)
-    createbutton.addEventListener('click', function() {
-      event.preventDefault()
-      event.stopPropagation()
-
-      // if(flag === "shareWithMe"){
-      //     ShareWithMe(null,null);
-      // }
-      // if(flag === "documentLibrary"){
-      //   getdoclibdata(currentfolderpath , currentsiteID , currentDocumentLibrary)
-      // }
-      getdoclibdata(currentfolderpath , currentsiteID , currentDocumentLibrary)
-  });
+   
   }
+const RemoveSSearchFile = async (event: React.FormEvent) => {
+  event.preventDefault();
+  event.stopPropagation();
+  const searchInput = document.getElementById('searchinput') as HTMLInputElement;
+  setcurrentSearchText('');
+  searchInput.value = '';
+  if (routeToDiffSideBar === "myRequest") {
+    myRequest(null, null, null);
+  }
+
+  else if (routeToDiffSideBar === "myFavourite") {
+
+    // console.log("myFavourite");
+    myFavorite(null, null, null);
+
+  }
+  else if (routeToDiffSideBar === "myFolder") {
+    // console.log("Inside search => myFolder");
+    mycreatedfolders(event, null);
+  }
+  else if (routeToDiffSideBar === "shareWithOthers") {
+    ShareWithOther(null, null);
+  }
+  else if (routeToDiffSideBar === "shareWithMe") {
+    ShareWithMe(null, null);
+  }else if(routeToDiffSideBar === "recyclebin"){
+    Recyclebin(null,null,null);
 }
 
 }
@@ -4372,7 +4759,7 @@ const searchFiles = async (event: React.FormEvent) => {
   const searchText = searchInput.value;
   console.log(searchText, "searchText")
   setcurrentSearchText(searchText);
-
+    
   if (searchText !== "") {
     try {
       console.log(currentfolderpath, "currentfolderpath")
@@ -4395,7 +4782,7 @@ const searchFiles = async (event: React.FormEvent) => {
       let qyerytext=`${wildcardquery} IsDocument:True Path:"${currentSearchPath}"`;
       let graphcl=await (props.context as BaseWebPartContext).msGraphClientFactory.getClient("3");
       let mssearch=new GraphSearchHelper(graphcl);
-      // let searchres=await mssearch.searchFiles("IsDocument:True Path:https://officeindia.sharepoint.com/sites/AlRostmani/TestHub",100);
+     
       let searchres=await mssearch.searchFiles(qyerytext,500);
   
       let files: IDocumentDisplayFields[] = searchres.map(filehit => {
@@ -4432,7 +4819,7 @@ const searchFiles = async (event: React.FormEvent) => {
         files.forEach((file: IDocumentDisplayFields) => {
           const card = document.createElement("div");
           const { fileIcon } = getFileIcon(file.Title);
-          card.className = "card";
+          card.className = "cardsearch";
           card.dataset.fileId = file.UniqueId;
           let fileserverrelativeurl=file.Path.substring(RootsiteUrl.length)
           // console.log(file.UniqueId , "file.UniqueId")
@@ -4440,16 +4827,17 @@ const searchFiles = async (event: React.FormEvent) => {
           let filefoldername=foldernamesplit?.slice(-2, -1)[0];
           card.innerHTML = `
                  <div class="row">
-        <div class="col-md-2 pe-0">
+        <div class="col-md-1 neww pe-0">
                   <img class="filextension" src=${fileIcon} alt="File icon"/>
                  </div>
-                  <div class="col-md-10 pe-0">
-                 <p class="p1st"><a href="#" onclick="PreviewFile('${fileserverrelativeurl}', '${currentsiteID}' , '${currentDocumentLibrary}')" >${file.Title} (${filefoldername})</a></p>
-                  <p class="p3rd">${((file.Size as unknown as number) / (1024 * 1024)).toFixed(2)} MB</p>
-                   <p class="p3rd"></p>
-                  <p class="p3rd">Uploaded by: ${file.CreatedBy}</p>
-                  <p class="p3rd">Published on: ${file.Modified?.toLocaleDateString()}</p>
-                  <p class="p3rd">${file.Summary}</p>
+                  <div class="col-md-11 pe-0">
+                   <p class="p2nd"> ${((file.Size as unknown as number) / (1024 * 1024)).toFixed(2)} MB</p>
+                 <p class="p1st mb-1"><a href="#" class="newfont" onclick="PreviewFile('${fileserverrelativeurl}', '${currentsiteID}' , '${currentDocumentLibrary}')" >${file.Title} (${filefoldername})</a></p>
+                                   <p class="p2nd1 mb-1">${file.Summary}</p>
+                                   <div class="newdes mt-2">
+                  <p class="p2nd mb-0"><span class="fw-bold newfont">Uploaded by : </span> <span style="font-size:13px; font-weight:500"> ${file.CreatedBy} </span> &nbsp; &nbsp;| </p>
+                  <p class="p2nd mb-0"><span  class="fw-bold newfont">Published on :</span> <span style="font-size:13px;font-weight:500"> ${file.Modified?.toLocaleDateString()} </span> </p>
+                     </div>
                  </div></div>
                   <div id="three-dots" class="three-dots" onclick="toggleMenu2('${file.UniqueId}', '${currentsiteID}')">
                     <span>...</span>
@@ -7393,9 +7781,9 @@ window.deleteFile = async(fileId:string, siteID:string, IsHardDelete:any, ListTo
       
           const parentFolder = file.ServerRelativeUrl.substring(0, file.ServerRelativeUrl.lastIndexOf('/'));
           const siteUrl = window.location.origin;
-            const previewUrl = `${siteUrl}/sites/AlRostmani/DMSOrphanDocs/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
+            // const previewUrl = `${siteUrl}/sites/AlRostmani/DMSOrphanDocs/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
             // const previewUrl = `${siteUrl}/sites/AlRostmanispfx2/${currentEntity}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
-          //  const previewUrl = `${siteUrl}/sites/IntranetUAT/${currentEntity}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
+           const previewUrl = `${siteUrl}/sites/IntranetUAT/${currentEntity}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
           console.log("previewUrl",previewUrl);
           payload.FilePreviewURL=previewUrl
 
@@ -8181,13 +8569,13 @@ let folderItems:any[]=[]
     superAdmin=true;
     folderItems = await sp.web.lists
     .getByTitle("DMSFolderMaster")
-    .items.select("CurrentUser" , "IsFolder" , "FolderPath" , "DocumentLibraryName","SiteTitle","ID" , "IsPrivate","IsLibrary","FolderName","IsRename")
+    .items.select("CurrentUser" , "IsFolder" , "FolderPath" , "DocumentLibraryName","SiteTitle","ID" , "IsPrivate","IsLibrary","FolderName","IsRename" ,"External")
     .orderBy("Created", false).getAll();
   }else{
 
     folderItems = await sp.web.lists
     .getByTitle("DMSFolderMaster")
-    .items.select("CurrentUser" , "IsFolder" , "FolderPath" , "DocumentLibraryName","SiteTitle","ID" , "IsPrivate","IsLibrary","FolderName","IsRename")
+    .items.select("CurrentUser" , "IsFolder" , "FolderPath" , "DocumentLibraryName","SiteTitle","ID" , "IsPrivate","IsLibrary","FolderName","IsRename" ,"External")
     .filter(`CurrentUser eq '${currentUserEmailRef.current}'`).orderBy("Created", false).getAll();
   }
 // end
@@ -8286,6 +8674,10 @@ if(filteredFileData.length === 0){
 }
 // change the array name in the for loop
 for(const files of filteredFileData){
+  let externalFolder=false;
+if(files.External === true){
+  externalFolder=true;
+}
 // console.log("FolderName",files.FolderName);
 let deleteFolderName=''
 let folderName='';
@@ -8335,7 +8727,7 @@ menu.id =`menu-${files.ID}`;
 menu.className = "popup-menu";
 menu.innerHTML = `
 <ul>
-     <li onclick="managePermission('${files.DocumentLibraryName}','${files.SiteTitle}','${files.SiteID}','${files.FolderName}','${files.FolderPath}')">
+     <li onclick="managePermission('${files.DocumentLibraryName}','${files.SiteTitle}','${files.SiteID}','${files.FolderName}','${files.FolderPath}' , '${externalFolder}')">
       <img src=${ManagePermissionFolder} alt="ManagePermission"/>
       Manage Permission
   </li>
@@ -9045,8 +9437,8 @@ window.toggleFavourite=async (fileId,siteId)=> {
             const encodedFilePath = encodeURIComponent(file.ServerRelativeUrl);
             const parentFolder = file.ServerRelativeUrl.substring(0, file.ServerRelativeUrl.lastIndexOf('/'));
             const siteUrl = window.location.origin;
-              const previewUrl = `${siteUrl}/sites/AlRostmani/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
-            //  const previewUrl = `${siteUrl}/sites/IntranetUAT/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
+              // const previewUrl = `${siteUrl}/sites/AlRostmani/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
+             const previewUrl = `${siteUrl}/sites/IntranetUAT/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
             //  const previewUrl = `${siteUrl}/sites/AlRostmanispfx2/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
             console.log("previewUrl",previewUrl);
 
@@ -10286,7 +10678,7 @@ window.manageWorkflow=async(DocumentLibraryName:string,SiteTilte:string, SiteID:
 }
 
  //Manage Folder Permission Action
- window.managePermission=(documentLibraryName:string,SiteTilte:string,SiteID:string, folderName:any ,folderPath:any )=>{
+ window.managePermission=(documentLibraryName:string,SiteTilte:string,SiteID:string, folderName:any ,folderPath:any , externalFolder:any )=>{
   setShowfolderpermission(true)
   // console.log(message);
   console.log("documentLibraryName",documentLibraryName)
@@ -10300,6 +10692,7 @@ window.manageWorkflow=async(DocumentLibraryName:string,SiteTilte:string, SiteID:
   managePermissionProps.SiteID=SiteID;
   managePermissionProps.FolderName=folderName;
   managePermissionProps.FolderPath=folderPath;
+  managePermissionProps.externalFolder=externalFolder;
   //  handleButtonClickShow("managePermission");
   
   // handleButtonClickShow("managePermission");
@@ -10878,8 +11271,8 @@ window.shareFile=async(fileID:string,siteId:string,currentFolderPathForFile:stri
     // Get the base site URL
     const siteUrl = window.location.origin;
     console.log(siteUrl, "siteUrl");
-    // const previewUrl = `${siteUrl}/sites/IntranetUAT/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${filePath}&parent=${encodedParentFolder}`;
-    const previewUrl = `${siteUrl}/sites/AlRostmani/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${encodeURIComponent(filePath)}&parent=${encodedParentFolder}`;
+    const previewUrl = `${siteUrl}/sites/IntranetUAT/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${filePath}&parent=${encodedParentFolder}`;
+    // const previewUrl = `${siteUrl}/sites/AlRostmani/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${encodeURIComponent(filePath)}&parent=${encodedParentFolder}`;
     // const previewUrl = `${siteUrl}/sites/AlRostmanispfx2/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${encodeURIComponent(filePath)}&parent=${encodedParentFolder}`;
     preURL=previewUrl;
   }
@@ -11309,10 +11702,54 @@ document.getElementById('share-shareFileButton').addEventListener('click', async
             // );
             // console.log(`User ${user.email} added with role type ${selectedPermission},${roleType}---${SharingRole.Edit}.`);
             // console.log("Data added successfully in the",newItem);
-
+            try {
+              const subject = `File shared with you: ${fileName}`;
+              const body = `File shared with you: ${fileName}`;
+              const emailProps:any = {
+                To: [user.email],
+                Subject: subject,
+                Body: body,
+                AdditionalHeaders: {
+                  "content-type": "text/html",
+                }
+              };
+          
+              // Send the email
+              await sp.utility.sendEmail(emailProps);
+              console.log("Email sent successfully to", user.email);
+          
+            } catch (error) {
+              console.error("Error sending email:", error);
+            }
             
       })
-     
+  
+      // try {
+      //   // Fetch user details using user IDs
+      //   const userPromises = selectedUsers.map(userId => sp.web.getUserById(Number(userId.id))());
+      //   const users = await Promise.all(userPromises);
+        
+      //   // Get email addresses from user details
+      //   const emailAddresses = users.map(user => user.Email);
+      //   const subject = `File shared with you: ${fileName}`;
+      //   const body = `File shared with you: ${fileName}`;
+      //   // Construct the email properties
+      //   const emailProps = {
+      //     To: emailAddresses,
+      //     Subject: subject,
+      //     Body: body,
+      //     AdditionalHeaders: {
+      //       "content-type": "text/html",
+      //     }
+      //   };
+    
+      //   // Send the email
+      //   await sp.utility.sendEmail(emailProps);
+      //   console.log("Email sent successfully to", emailAddresses);
+    
+      // } catch (error) {
+      //   console.error("Error sending email:", error);
+      // }
     } catch (error) {
       console.log("Error in adding data to the DMSShareWithOtherMaster",error);
       // onError();
@@ -12673,6 +13110,13 @@ librarydiv.appendChild(mainContainer)
                           className="search-input"
                           placeholder="Search files..."
                         />
+                        {/* <a className="searchbutton" onClick={RemoveSSearchFile}>
+                          <img
+                            src={require("../assets/cross.png")}
+                            alt="Search"
+                            className="search-icon"
+                          />
+                        </a> */}
                         <a className="searchbutton" onClick={searchFiles}>
                           <img
                             src={require("../assets/searchicon.png")}
@@ -12736,7 +13180,8 @@ librarydiv.appendChild(mainContainer)
                       "DocumentLibrary": currentDocumentLibrary,
                       "Folder" :currentFolder,
                       "folderpath": currentfolderpath,
-                      "IsFolderDeligationUser":`${IsFolderDeligationUser}`
+                      "IsFolderDeligationUser":`${IsFolderDeligationUser}`,
+                       "IsExternal":`${IsExternal}`,
                      }}
                      onReturnToMain={handleReturnToMain} />
                     )}

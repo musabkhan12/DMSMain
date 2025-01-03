@@ -87,13 +87,31 @@ console.log("documentLibraryName" , documentLibraryName)
 
   // let selectedFile:any=null;
 
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files![0];
-    if (file) {
-      // selectedFile=file;
-      uploadFile(file);
-    }
+    // if (file) {
+    //   // selectedFile=file;
+    //   uploadFile(file);
+    // }
 
+  
+    if (file) {
+      const allowedExtensions = ['doc', 'docx', 'ppt', 'pdf', 'xls', 'xlsx', 'txt', 'png', 'jpg', 'jpeg'];
+      const fileExtension = file.name.split('.').pop()?.toLowerCase();
+  
+      if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
+        // alert('Invalid file type. Only DOC, DOCX, PPT, PDF, XLS, XLSX, TXT, PNG, JPG, JPEG are allowed.');
+        Swal.fire({
+          icon: 'error',
+          title: 'Invalid file type',
+          text: 'Only DOC, DOCX, PPT, PDF, XLS, XLSX, TXT, PNG, JPG, JPEG are allowed.',
+        });
+        event.target.value = ''; // Clear the input
+      } else {
+        uploadFile(file);
+      }
+    }
   };
 
   const uploadFile = async (file: File) => {
@@ -124,9 +142,9 @@ console.log("documentLibraryName" , documentLibraryName)
     const parentFolder = serverRelativeUrl.substring(0, serverRelativeUrl.lastIndexOf('/'));
     const siteUrl = window.location.origin;
 
-     const previewUrl = `${siteUrl}/sites/AlRostmani/DMSOrphanDocs/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
+    //  const previewUrl = `${siteUrl}/sites/AlRostmani/DMSOrphanDocs/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
     //  const previewUrl = `${siteUrl}/sites/AlRostmanispfx2/DMSOrphanDocs/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
-      // const previewUrl = `${siteUrl}/sites/IntranetUAT/DMSOrphanDocs/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
+      const previewUrl = `${siteUrl}/sites/IntranetUAT/DMSOrphanDocs/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
     console.log("Generated Preview URL:", previewUrl);
    if(previewUrl){
     console.log("enter herr")
@@ -336,29 +354,206 @@ React.useEffect(()=>{
   
 
 
-const handleSubmit = async (event: any) => {
+// const handleSubmit = async (event: any) => {
 
+//   event.preventDefault();
+//   console.log("Button clicked");
+
+//   const formSelector = document.getElementById("formSelector") as HTMLFormElement;
+//   if (!formSelector.checkValidity()) {
+//       formSelector.reportValidity(); // Show validation errors
+//       return;
+//   }
+
+//   // Prepare the payload for SharePoint dynamically
+//   const inputs = document.querySelectorAll('.dynamic-input');
+//   // console.log("inputs",inputs)
+
+  
+//   const payload: any = {};
+
+//   inputs.forEach((input) => {
+//       const inputElement = input as HTMLInputElement;
+//       const fieldName = inputElement.id;
+//       if (!fieldName) return; // Skip if field name is invalid
+
+//       if (inputElement.type === "checkbox") {
+//           // console.log("fieldName",fieldName.includes(' '));
+//           payload[fieldName] = inputElement.checked;
+//       } else if (inputElement.type !== "file") {
+//           if(inputElement.value === ""){
+//              console.log("skip");
+//           }else{
+//             // if(fieldName.includes(' '))
+//             // console.log("fieldName",fieldName.includes(' '));
+//             payload[fieldName] = inputElement.value;
+//           }
+          
+//       }
+//   });
+
+//   const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+//   const selectedFile = fileInput?.files?.[0]; 
+
+//   if (!selectedFile) {
+//       console.error("No file selected.");
+
+//       return;
+//   }
+
+//   try {
+//       console.log("Payload:", payload);
+//       console.log("SiteID:", currentfolderpath.siteID);
+
+//       const testidsub = await sp.site.openWebById(currentfolderpath.siteID);
+//       if (!testidsub) throw new Error("Subsite not found.");
+
+//       const documentLibraryInWhichWeUploadTheFile = testidsub.web.getFolderByServerRelativePath(currentfolderpath.folderpath);
+//       console.log("Current Path:", documentLibraryInWhichWeUploadTheFile);
+
+//       const files = await documentLibraryInWhichWeUploadTheFile.files();
+//       const fileExists = files.some(file => file.Name === selectedFile.name);
+  
+//       if (fileExists) {
+//          Swal.fire({
+//            icon: 'error',
+//            title: 'File already exists',
+//            text: 'The file you are trying to upload already exists in the document library. Please choose a different file name.',
+//          })
+//          return
+//       }
+  
+      
+//       const uploadResult = await documentLibraryInWhichWeUploadTheFile.files.addChunked(selectedFile.name, selectedFile);
+//       console.log("File uploaded successfully", uploadResult.data.Name);
+//       const submitBtn = document.getElementById("submitBtn") as HTMLButtonElement;
+//       submitBtn.disabled = true; 
+//       submitBtn.innerText = "Submitting..."; // Optional: Change button text to indicate progress
+    
+//       const listItem = await uploadResult.file.getItem();
+//       console.log("ListItems ",listItem);
+      
+//       const parentFolder = uploadResult.data.ServerRelativeUrl.substring(0, uploadResult.data.ServerRelativeUrl.lastIndexOf('/'));
+//       const siteUrl = window.location.origin;
+//       const encodedFilePath = encodeURIComponent(uploadResult.data.ServerRelativeUrl);
+//       console.log(encodedFilePath , "encodedFilePath")
+//         const previewUrl = `${siteUrl}/sites/AlRostmani/${currentfolderpath.Entity}/${currentfolderpath.DocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
+//       //  const previewUrl = `${siteUrl}/sites/AlRostmanispfx2/${currentfolderpath.Entity}/${currentfolderpath.DocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
+//         //  const previewUrl = `${siteUrl}/sites/IntranetUAT/${currentfolderpath.Entity}/${currentfolderpath.DocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
+      
+//       console.log("Generated Preview URL:", previewUrl);
+//       if (!listItem) throw new Error("List item not found for the uploaded file.");
+
+
+//       if(IsApproval === true){
+  
+//         status="Pending";
+//       }else if(IsApproval === false){
+
+//         status="Auto Approved";
+//       }
+//       (payload as any).Status=status;
+//       await listItem.update(payload);
+//       console.log("File metadata updated successfully with:", payload);
+     
+      
+//       // alert(`status,${status}`);
+//       const newItem = await sp.web.lists.getByTitle(`DMS${currentfolderpath.Entity}FileMaster`).items.add({
+//           FileName: String(uploadResult.data.Name),
+//           FileSize: String(uploadResult.data.Length),
+//           FileVersion: String(uploadResult.data.MajorVersion),
+//           CurrentFolderPath: String(currentfolderpath.folderpath),
+//           FileUID: String(uploadResult.data.UniqueId),
+//           CurrentUser: String(currentUserEmailRef.current),
+//           SiteID: String(currentfolderpath.siteID),
+//           Status: status,
+//           FilePreviewURL : String(previewUrl),
+//           DocumentLibraryName:String(currentfolderpath.DocumentLibrary),
+//           SiteName : String(currentfolderpath.Entity),
+//           MyRequest: true,
+//           RequestNo: `DMS-${uploadResult.data.UniqueId}`
+//       });
+//       console.log(newItem, "New item added FileMaster");
+
+      
+//       if(IsApproval === true){
+//         const AddIteminDMSFileApprovalList = await sp.web.lists.getByTitle('DMSFileApprovalList').items.add({
+//           SiteName : String(currentfolderpath.Entity),  
+//            DocumentLibraryName : String(currentfolderpath.DocumentLibrary),
+//            RequestedBy  : String(currentUserEmailRef.current),
+//            FileName: String(uploadResult.data.Name),
+//            FileUID: String(uploadResult.data.UniqueId),
+//            FilePreviewUrl: String(previewUrl),
+//            Status: String('Pending'),
+//            FolderPath : String(currentfolderpath.folderpath),
+//            ApproveAction : String('Submitted'),
+//            ApprovedLevel : 1,
+//            RequestNo: `DMS-${uploadResult.data.UniqueId}`
+//       })
+//       }
+
+
+//     // console.log(AddIteminDMSFileApprovalList, "New item added to DMSFileApprovalList");
+
+//     if(newItem ){
+//       Deletemedia()
+//       setTimeout(() => {
+//         location.reload()
+//         onReturnToMain(); // Call onReturnToMain after 3 seconds
+//     }, 3000); // 3000 milliseconds = 3 seconds
+//      }
+
+    
+
+//   }catch (error) {
+//       console.error("Error during submission:", error);
+//   }
+
+
+// };
+const getUniqueRequestNo = async () => {
+  const counterItem = await sp.web.lists.getByTitle('DMSFileCounterList').items.getById(1)();
+  console.log("Counter Item 0", counterItem);
+  console.log("Counter Item 1", counterItem.FileCount);
+  let fileCounter = counterItem.FileCount;
+
+  // Increment the counter
+  fileCounter++;
+
+  // Generate the new RequestNo
+  const newRequestNo = `File${String(fileCounter).padStart(2, '0')}`;
+
+  // Update the counter in the CounterList
+  await sp.web.lists.getByTitle('DMSFileCounterList').items.getById(1).update({
+    FileCount: fileCounter
+  });
+
+  return newRequestNo;
+};
+
+const handleSubmit = async (event: any) => {
+ 
   event.preventDefault();
   console.log("Button clicked");
-
+ 
   const formSelector = document.getElementById("formSelector") as HTMLFormElement;
   if (!formSelector.checkValidity()) {
       formSelector.reportValidity(); // Show validation errors
       return;
   }
-
+ 
   // Prepare the payload for SharePoint dynamically
   const inputs = document.querySelectorAll('.dynamic-input');
   // console.log("inputs",inputs)
-
-  
+ 
+ 
   const payload: any = {};
-
+ 
   inputs.forEach((input) => {
       const inputElement = input as HTMLInputElement;
       const fieldName = inputElement.id;
       if (!fieldName) return; // Skip if field name is invalid
-
+ 
       if (inputElement.type === "checkbox") {
           // console.log("fieldName",fieldName.includes(' '));
           payload[fieldName] = inputElement.checked;
@@ -370,75 +565,88 @@ const handleSubmit = async (event: any) => {
             // console.log("fieldName",fieldName.includes(' '));
             payload[fieldName] = inputElement.value;
           }
-          
+         
       }
   });
-
+ 
   const fileInput = document.getElementById('fileInput') as HTMLInputElement;
-  const selectedFile = fileInput?.files?.[0]; 
-
+  const selectedFile = fileInput?.files?.[0];
+ 
   if (!selectedFile) {
       console.error("No file selected.");
-
+ 
       return;
   }
-
+ 
   try {
       console.log("Payload:", payload);
       console.log("SiteID:", currentfolderpath.siteID);
-
+ 
       const testidsub = await sp.site.openWebById(currentfolderpath.siteID);
       if (!testidsub) throw new Error("Subsite not found.");
-
+ 
       const documentLibraryInWhichWeUploadTheFile = testidsub.web.getFolderByServerRelativePath(currentfolderpath.folderpath);
       console.log("Current Path:", documentLibraryInWhichWeUploadTheFile);
-
+ 
       const files = await documentLibraryInWhichWeUploadTheFile.files();
-      const fileExists = files.some(file => file.Name === selectedFile.name);
-  
-      if (fileExists) {
-         Swal.fire({
-           icon: 'error',
-           title: 'File already exists',
-           text: 'The file you are trying to upload already exists in the document library. Please choose a different file name.',
-         })
-         return
+      // const fileExists = files.some(file => file.Name === selectedFile.name);
+ 
+      // if (fileExists) {
+      //    Swal.fire({
+      //      icon: 'error',
+      //      title: 'File already exists',
+      //      text: 'The file you are trying to upload already exists in the document library. Please choose a different file name.',
+      //    })
+      //    return
+      // }
+      const originalFileName = selectedFile.name;
+      const fileExtension = originalFileName.substring(originalFileName.lastIndexOf('.'));
+      const baseFileName = originalFileName.substring(0, originalFileName.lastIndexOf('.'));
+      console.log("originalFileName",originalFileName);
+      console.log("fileExtension",fileExtension);
+      console.log("baseFileName",baseFileName);
+      let uniqueFileName = originalFileName;
+      let counter = 1;
+ 
+      while (files.some(file => file.Name === uniqueFileName)) {
+        uniqueFileName = `${baseFileName}(${counter})${fileExtension}`;
+        counter++;
       }
-  
-      
-      const uploadResult = await documentLibraryInWhichWeUploadTheFile.files.addChunked(selectedFile.name, selectedFile);
+      console.log(`Unique file name generated: ${uniqueFileName}`);
+      // const uploadResult = await documentLibraryInWhichWeUploadTheFile.files.addChunked(selectedFile.name, selectedFile);
+      const uploadResult = await documentLibraryInWhichWeUploadTheFile.files.addChunked(uniqueFileName, selectedFile);
       console.log("File uploaded successfully", uploadResult.data.Name);
       const submitBtn = document.getElementById("submitBtn") as HTMLButtonElement;
-      submitBtn.disabled = true; 
+      submitBtn.disabled = true;
       submitBtn.innerText = "Submitting..."; // Optional: Change button text to indicate progress
-    
+   
       const listItem = await uploadResult.file.getItem();
       console.log("ListItems ",listItem);
-      
+     
       const parentFolder = uploadResult.data.ServerRelativeUrl.substring(0, uploadResult.data.ServerRelativeUrl.lastIndexOf('/'));
       const siteUrl = window.location.origin;
       const encodedFilePath = encodeURIComponent(uploadResult.data.ServerRelativeUrl);
       console.log(encodedFilePath , "encodedFilePath")
-        const previewUrl = `${siteUrl}/sites/AlRostmani/${currentfolderpath.Entity}/${currentfolderpath.DocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
+        // const previewUrl = `${siteUrl}/sites/AlRostmani/${currentfolderpath.Entity}/${currentfolderpath.DocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
       //  const previewUrl = `${siteUrl}/sites/AlRostmanispfx2/${currentfolderpath.Entity}/${currentfolderpath.DocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
-        //  const previewUrl = `${siteUrl}/sites/IntranetUAT/${currentfolderpath.Entity}/${currentfolderpath.DocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
-      
+         const previewUrl = `${siteUrl}/sites/IntranetUAT/${currentfolderpath.Entity}/${currentfolderpath.DocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
+     
       console.log("Generated Preview URL:", previewUrl);
       if (!listItem) throw new Error("List item not found for the uploaded file.");
-
-
+ 
+ 
       if(IsApproval === true){
-  
+ 
         status="Pending";
       }else if(IsApproval === false){
-
+ 
         status="Auto Approved";
       }
       (payload as any).Status=status;
       await listItem.update(payload);
       console.log("File metadata updated successfully with:", payload);
      
-      
+      const newRequestNo = await getUniqueRequestNo();
       // alert(`status,${status}`);
       const newItem = await sp.web.lists.getByTitle(`DMS${currentfolderpath.Entity}FileMaster`).items.add({
           FileName: String(uploadResult.data.Name),
@@ -453,11 +661,13 @@ const handleSubmit = async (event: any) => {
           DocumentLibraryName:String(currentfolderpath.DocumentLibrary),
           SiteName : String(currentfolderpath.Entity),
           MyRequest: true,
-          RequestNo: `DMS-${uploadResult.data.UniqueId}`
+          Processname : 'New File Request',
+          // RequestNo: `DMS-${uploadResult.data.UniqueId}`
+          RequestNo: newRequestNo
       });
       console.log(newItem, "New item added FileMaster");
-
-      
+ 
+     
       if(IsApproval === true){
         const AddIteminDMSFileApprovalList = await sp.web.lists.getByTitle('DMSFileApprovalList').items.add({
           SiteName : String(currentfolderpath.Entity),  
@@ -470,13 +680,14 @@ const handleSubmit = async (event: any) => {
            FolderPath : String(currentfolderpath.folderpath),
            ApproveAction : String('Submitted'),
            ApprovedLevel : 1,
-           RequestNo: `DMS-${uploadResult.data.UniqueId}`
+           RequestNo: newRequestNo,
+           Processname : 'New File Request',
       })
       }
-
-
+ 
+ 
     // console.log(AddIteminDMSFileApprovalList, "New item added to DMSFileApprovalList");
-
+ 
     if(newItem ){
       Deletemedia()
       setTimeout(() => {
@@ -484,14 +695,14 @@ const handleSubmit = async (event: any) => {
         onReturnToMain(); // Call onReturnToMain after 3 seconds
     }, 3000); // 3000 milliseconds = 3 seconds
      }
-
-    
-
+ 
+   
+ 
   }catch (error) {
       console.error("Error during submission:", error);
   }
-
-
+ 
+ 
 };
 
 const Deletemedia = () => {

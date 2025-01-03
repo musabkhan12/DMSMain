@@ -11,6 +11,29 @@
   float: left; margin-top: 30px;
 
 }
+.cardsearch{    border: 1px solid #54ade0 !important;
+  border-radius: 6px !important;
+  float: left;
+  height: 140px;
+  margin: 5px; background: #fff;
+  padding: .75rem;
+  position: relative !important;
+  width: 99.5%;}
+  .cardsearch p.mb-0{margin-bottom: 0px !important;}
+  .cardsearch .p1st a{color: #000 !important;}
+  .width50{width: 50% !important; float: left;}
+  .cardsearch .p1st a:hover{color: #1fb0e5 !important;}
+  .cardsearch .p2nd span{font-weight: 600; color: #000;}
+  .cardsearch .newfont{font-size: 14px;}
+  .cardsearch .newdes{display: flex; gap: 10px;}
+  .cardsearch .neww{width: 50px !important;}
+  .cardsearch .p2nd1{
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    display: -webkit-box; font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 .font-18{font-size:18px;}
 .Home{
   color: black !important;
@@ -509,7 +532,7 @@ a:hover
  #files-container button{    position: absolute;
   right: 28px;
   font-size: 14px; background: #1fb0e5;
-  margin-top: -18px;}
+  margin-top: 0px;}
   #files-container button:hover{
     background: #008751;
   }
@@ -755,8 +778,8 @@ border-radius: 5px;}
 }
  
 .mycreatedfolderpublicorlibrary{
-  display: inline-flex;
-      gap: 6px;
+  display: flex;
+      gap: 6px; justify-content: end;
 }
 .filestatus2{
   border-radius: 5px;
@@ -799,8 +822,10 @@ border-radius: 5px;}
   border-radius: 6px !important;
   height: 107px; padding: 0.75rem; position: relative !important;
 }
+.search-container input:focus{outline: 1px solid #1fb0e5 !important;}
 @media(max-width:640px){
 .mainsidebardms,#files-container .card{width: 100% !important;}
+.cardsearch .neww{margin-bottom: 10px;}
 .librarydata {
   float: left;
   overflow: initial !important;
@@ -819,6 +844,7 @@ float: left;}
 .popup-content-auditHistory,.share-popup-content{width: 95% !important;}
 #files-container .col-md-10{    width: 84% !important;
 float: left;}
+.cardsearch{height: auto;}
 
 }
 .p-31{padding: 20px !important; width: 100%;}

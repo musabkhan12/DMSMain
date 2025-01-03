@@ -291,39 +291,106 @@ const CreateFolder: React.FC<CreateFolderProps> = ({
         // console.log("Site Users",combineUsersArray);
         // setSiteUsers(combineUsersArray);
 
-        // fetch the data from site Gropus
-          const [
-          users,
-          users1,
-          users2,
-          users3,
-          users4,
-        ] = await Promise.all([
-          sp.web.siteGroups.getByName(`${OthProps.Entity}_Read`).users(),
-          sp.web.siteGroups.getByName(`${OthProps.Entity}_Initiator`).users(),
-          sp.web.siteGroups.getByName(`${OthProps.Entity}_Contribute`).users(),
-          sp.web.siteGroups.getByName(`${OthProps.Entity}_Admin`).users(),
-          sp.web.siteGroups.getByName(`${OthProps.Entity}_View`).users(),
-        ]);
-
-        const combineArray = [
-          ...(users || []),
-          ...(users1 || []),
-          ...(users2 || []),
-          ...(users3 || []),
-          ...(users4 || []),
-        ];
-        setSiteUsers(
-          combineArray.map((user) => ( 
-          {
+        if(OthProps.IsExternal === 'true'){
+          const user0 = await sp.web.siteUsers();
+          const user1 = await sp.web.siteGroups();
+          const groupsArray=user1.map((user)=>(
+            {
+            PrincipalType:user.PrincipalType,
             userId:user.Id,
             value: user.Title,
             label: user.Title,
-            email: user.Email,
-          }
-        ))
-        );
-        console.log("combineArray", combineArray);
+            email: user.Title,
+            }
+          ))
+          const combineUsersArray=user0.map((user)=>(
+                {
+                userId:user.Id,
+                value: user.Title,
+                label: user.Title,
+                email: user.Email,
+            }
+          ))
+          let resultArray =[...combineUsersArray, ...groupsArray];
+          console.log("resultArray --->",resultArray)
+          setSiteUsers(resultArray);
+        }else{
+          // fetch the data from site Gropus
+          const [
+            users,
+            users1,
+            users2,
+            users3,
+            users4,
+            users5,
+            users6,
+            users7
+          ] = await Promise.all([
+            sp.web.siteGroups.getByName(`${OthProps.Entity}_Read`).users(),
+            sp.web.siteGroups.getByName(`${OthProps.Entity}_Initiator`).users(),
+            sp.web.siteGroups.getByName(`${OthProps.Entity}_Contribute`).users(),
+            sp.web.siteGroups.getByName(`${OthProps.Entity}_Admin`).users(),
+            sp.web.siteGroups.getByName(`${OthProps.Entity}_View`).users(),
+            sp.web.siteGroups.getByName(`${OthProps.Entity}_AllUsers`).users(),
+            sp.web.siteGroups.getByName(`${OthProps.Entity}_Approval`).users(),
+            sp.web.siteGroups.getByName(`DMSSuper_Admin`).users(),
+          ]);
+  
+          const combineArray = [
+            ...(users || []),
+            ...(users1 || []),
+            ...(users2 || []),
+            ...(users3 || []),
+            ...(users4 || []),
+            ...(users5 || []),
+            ...(users6 || []),
+            ...(users7 || []),
+          ];
+          setSiteUsers(
+            combineArray.map((user) => ( 
+            {
+              userId:user.Id,
+              value: user.Title,
+              label: user.Title,
+              email: user.Email,
+            }
+          ))
+          );
+          console.log("combineArray", combineArray);
+        }
+        // // fetch the data from site Gropus
+        //   const [
+        //   users,
+        //   users1,
+        //   users2,
+        //   users3,
+        //   users4,
+        // ] = await Promise.all([
+        //   sp.web.siteGroups.getByName(`${OthProps.Entity}_Read`).users(),
+        //   sp.web.siteGroups.getByName(`${OthProps.Entity}_Initiator`).users(),
+        //   sp.web.siteGroups.getByName(`${OthProps.Entity}_Contribute`).users(),
+        //   sp.web.siteGroups.getByName(`${OthProps.Entity}_Admin`).users(),
+        //   sp.web.siteGroups.getByName(`${OthProps.Entity}_View`).users(),
+        // ]);
+
+        // const combineArray = [
+        //   ...(users || []),
+        //   ...(users1 || []),
+        //   ...(users2 || []),
+        //   ...(users3 || []),
+        //   ...(users4 || []),
+        // ];
+        // setSiteUsers(
+        //   combineArray.map((user) => ( 
+        //   {
+        //     userId:user.Id,
+        //     value: user.Title,
+        //     label: user.Title,
+        //     email: user.Email,
+        //   }
+        // ))
+        // );
+        // console.log("combineArray", combineArray);
 
     }
     fetchUserFromSitLevel();
@@ -570,8 +637,8 @@ const CreateFolder: React.FC<CreateFolderProps> = ({
 
       if(OthProps.DocumentLibrary === ""){
         (payloadForFolderMaster as any).DocumentLibraryName=folderName;
-        //  (payloadForFolderMaster as any).FolderPath=`/sites/IntranetUAT/${OthProps.Entity}/${folderName}`;
-         (payloadForFolderMaster as any).FolderPath=`/sites/AlRostmanispfx2/${OthProps.Entity}/${folderName}`;
+         (payloadForFolderMaster as any).FolderPath=`/sites/IntranetUAT/${OthProps.Entity}/${folderName}`;
+        //  (payloadForFolderMaster as any).FolderPath=`/sites/AlRostmanispfx2/${OthProps.Entity}/${folderName}`;
         //  (payloadForFolderMaster as any).FolderPath=`/sites/AlRostmani/${OthProps.Entity}/${folderName}`;
         (payloadForFolderMaster as any).IsLibrary=true;
         (payloadForFolderMaster as any).IsActive=false;
@@ -582,6 +649,9 @@ const CreateFolder: React.FC<CreateFolderProps> = ({
         }
         if(OthProps.IsFolderDeligationUser === "true"){
           (payloadForFolderMaster as any).IsFolderDeligation=true;
+        }
+        if(OthProps.IsExternal === 'true'){
+          (payloadForFolderMaster as any).External=true;
         }
       }else{
         (payloadForFolderMaster as any).DocumentLibraryName=OthProps.DocumentLibrary;
@@ -604,6 +674,9 @@ const CreateFolder: React.FC<CreateFolderProps> = ({
 
         if(OthProps.IsFolderDeligationUser === "true"){
           (payloadForFolderMaster as any).IsFolderDeligation=true;
+        }
+        if(OthProps.IsExternal === 'true'){
+          (payloadForFolderMaster as any).External=true;
         }
       }
 
@@ -824,8 +897,8 @@ const CreateFolder: React.FC<CreateFolderProps> = ({
 
         if(OthProps.DocumentLibrary === ""){
           (payloadForFolderDelegation as any).DocumentLibraryName=folderName;
-          //  (payloadForFolderDelegation as any).FolderPath=`/sites/IntranetUAT/${OthProps.Entity}/${folderName}`;
-           (payloadForFolderMaster as any).FolderPath=`/sites/AlRostmanispfx2/${OthProps.Entity}/${folderName}`;
+            (payloadForFolderDelegation as any).FolderPath=`/sites/IntranetUAT/${OthProps.Entity}/${folderName}`;
+          //  (payloadForFolderMaster as any).FolderPath=`/sites/AlRostmanispfx2/${OthProps.Entity}/${folderName}`;
           //  (payloadForFolderDelegation as any).FolderPath=`/sites/AlRostmani/${OthProps.Entity}/${folderName}`;
           (payloadForFolderDelegation as any).IsLibrary=true;
           // (payloadForFolderDelegation as any).IsActive=false;

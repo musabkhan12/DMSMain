@@ -35,7 +35,7 @@ export default class AdvancedSearch extends React.Component<IAdvancedSearchProps
     this.state = {
       searchtext: "",
       searchfilter: "",
-      searchpath: props.context.pageContext.site.absoluteUrl, //"https://officeindia.sharepoint.com/sites/AlRostmani",
+      searchpath: props.context.pageContext.site.absoluteUrl, 
       searchresult: [],
       searchqueryRefiners:[],
       searchRefiners:[],
@@ -69,10 +69,10 @@ export default class AdvancedSearch extends React.Component<IAdvancedSearchProps
     //let dmsentityconfig=new DMSEntityConfigurationHelper(this.props.context);
     //let props=await dmsentityconfig.GetActiveEntityListsAndColumns();
     
-    //let qyerytext=`${searchtext} IsDocument:True ${searchFilters} Path:"https://officeindia.sharepoint.com/sites/AlRostmani/TestHub"`;
+
     let graphcl=await (this.props.context as BaseWebPartContext).msGraphClientFactory.getClient("3");
     let mssearch=new GraphSearchHelper(graphcl);
-    // let searchres=await mssearch.searchFiles("IsDocument:True Path:https://officeindia.sharepoint.com/sites/AlRostmani/TestHub",100);
+  
     let hitcont=await mssearch.searchAll(qyerytext,500,refiners,refinerfilters);  
     //hitcont.aggregations
     const searchres=(hitcont.hits)?hitcont.hits:[]

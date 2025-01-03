@@ -1,6 +1,6 @@
 declare global {
   interface Window {
-    managePermission: (DocumentLibraryName: string, SiteTilte: string, SiteID: string, folderName: any, folderPath: any) => void;
+    // managePermission: (DocumentLibraryName: string, SiteTilte: string, SiteID: string, folderName: any, folderPath: any) => void;
     manageWorkflow: (DocumentLibraryName: string, SiteTilte: string, SiteID: string) => void;
     view: (message: string) => void;
     PreviewFile: (path: string, siteID: string, docLibName: any, filemasterlist: any, filepreview: any) => void;
@@ -2364,7 +2364,7 @@ const ArgPoc = ({ props }: any) => {
     debugger
       let graphcl=await (props.context as BaseWebPartContext).msGraphClientFactory.getClient("3");
       let mssearch=new GraphSearchHelper(graphcl);
-      // let searchres=await mssearch.searchFiles("IsDocument:True Path:https://officeindia.sharepoint.com/sites/AlRostmani/TestHub",100);    
+   
       debugger
   }
   const runSearch = async (searhcpath?: string,filters:string='') => {
@@ -2380,7 +2380,7 @@ const ArgPoc = ({ props }: any) => {
       //   // Querytext: `${searchText} IsDocument:True Path:"${(searhcpath) ? searhcpath : searchQueryPath}"`,
 
       //   Querytext:"",
-      //   QueryTemplate: "IsDocument=True Path:\"https://officeindia.sharepoint.com/sites/AlRostmani/TestHub/\"*",
+   
       //   RowLimit: 20,
       //   SelectProperties: ["Title", "Path", "FileExtension", "UniqueId", "Size", "Created", "Modified", "Author", "ModifiedBy"],
       //   SourceId: "eff79881-1eb9-4f5e-bba5-86d48c22960c",
@@ -2393,7 +2393,7 @@ const ArgPoc = ({ props }: any) => {
       let qyerytext=`${searchText} IsDocument:True ${filters} Path:"${(searhcpath) ? searhcpath : searchQueryPath}"`;
       let graphcl=await (props.context as BaseWebPartContext).msGraphClientFactory.getClient("3");
       let mssearch=new GraphSearchHelper(graphcl);
-      // let searchres=await mssearch.searchFiles("IsDocument:True Path:https://officeindia.sharepoint.com/sites/AlRostmani/TestHub",100);
+    
       let searchres=await mssearch.searchFiles(qyerytext,500);
 
       let resultsdoc: IDocumentDisplayFields[] = searchres.map(filehit => {

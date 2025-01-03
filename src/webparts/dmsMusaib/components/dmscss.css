@@ -49,7 +49,7 @@ p.folder {font-size: 14px; font-weight: 600; margin-bottom: 7px; }
 .filestatus,.filestatus2{float:right;    width: 70px;
   text-align: center;
   line-height: 21px !important;}
-  #folderContainer2 .expanded ul .toggle-button{padding: 3px !important;}
+  #folderContainer2 .expanded ul .toggle-button{padding: 3px !important; margin: 0px 5px 0px 0px;}
 .sidebardms {
   background-color: transparent;
   
@@ -762,7 +762,7 @@ a:hover
     border-radius: 30px;
     margin-top: 10px;
 }
-.sidebardmsButton :hover{background: #959b95 !important; color: #fff !important; }
+.sidebardmsButton :hover{ color: #fff !important; }
 #files-container .popup-menu{display: none;}
 .popup-menu{position: absolute;
   box-shadow: 0 2px 4px -2px rgba(0, 0, 0, 0.16), 0 2px 6px 0 rgba(0, 0, 0, 0.12);
@@ -780,7 +780,7 @@ a:hover
   .row1{width: 33.3%; float: left;}
 .popup-menu ul li{ padding: 7px; cursor: pointer; margin-bottom: 1px;font-size: 13px;}
 .popup-menu ul li:hover{background: #f7fbfc;color: #1fb0e5;}
-.popup-menu ul li img{width: 14px; float: left; margin-top: 4px; margin-right: 5px;}
+.popup-menu ul li img{width: 14px; float: left; margin-top: 2px; margin-right: 5px;}
 .sidebardmsButton:hover{background: #fff;}
 
 .popup-menu ul li:hover img{filter: sepia(100%) hue-rotate(190deg) saturate(500%);}
@@ -805,7 +805,7 @@ a:hover
   .searchbutton{
     position: absolute;
     right: 15px;
-    top: 8px;
+    top: 6px;
     font-size: 20px;
   }.searchbutton img{
     width: 20px;
@@ -835,7 +835,7 @@ a:hover
 }
 #createuploadfilecont .mybutton1{
 
-     border: 1px solid #1fb0e5;
+     border: 0px solid #1fb0e5;
 }
 #createuploadfilecont .mybutton2{
   background: #fff;
@@ -844,6 +844,7 @@ a:hover
 .input-container input{height: 36px;}
 .main-containeruploadfile h1{font-size: 20px; text-align: center;}
 .p3rd,.p2nd{margin-bottom: 5px !important; font-size: 12px; color: #6b6b6b;}
+
 .p1st{-webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   display: -webkit-box;
@@ -995,4 +996,9 @@ text-align: center;
 @media(max-width:1440px)
 {
   .sharedFile{padding-left: 54px;}
+}
+@media(max-width:640px){
+  .mtbalenew{overflow: auto;}
+  .mtbalenew tbody{overflow: visible !important;}
+  .indexdesign{margin-left: 0px !important;}
 }
