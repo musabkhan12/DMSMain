@@ -185,6 +185,7 @@ let routeToDiffSideBar="";
 const ArgPoc = ({ props }: any) => {
   const sp: SPFI = getSP();
   // console.log(sp, "sp");
+  let locationPath=window.location.pathname.match(/\/sites\/[^\/]+/)[0];
   const [showDeletepopup, setShowDeletepopup] = useState(false);
  const [activeButton] = React.useState<string>("");
   const { useHide }: any = React.useContext(UserContext);
@@ -3842,7 +3843,7 @@ const createFileCardForDocumentLibrary=(file:any,fileIcon:any,siteID:string,IsHa
           <img src=${editIcon} alt="Edit"/>
                       Audit History
           </li>
-          <li onclick="PreviewFile('${file.ServerRelativeUrl}', '${siteID}' , '${docLibName}')">
+          <li onclick="PreviewFile('${file.ServerRelativeUrl}', '${siteID}' , '${docLibName}','${file.ListItemAllFields.Status}')">
           <img src=${FilePreview} alt="Preview"/>
                       Preview File
           </li>
@@ -3853,13 +3854,11 @@ const createFileCardForDocumentLibrary=(file:any,fileIcon:any,siteID:string,IsHa
           </li>
           <li onclick="shareFile('${file.UniqueId}','${siteID}','${FolderPath}','${file.Name}','DocumentLibrary','${file.MajorVersion}','${((file.Length as unknown as number) / (1024 * 1024)).toFixed(2)}','${file.ListItemAllFields.Status}','','${currentDocumentLibrary}')">
           <img src=${ShareFile} alt="Share"/> Share
-          </li>  
-          
-          
-          <li onclick="versionHistory('${file.Name}', '${file.ServerRelativeUrl}', '${siteID}' ,'DocumentLibrary')">
+          </li>
+          <li onclick="versionHistory('${file.Name}', '${file.ServerRelativeUrl}', '${siteID}' ,'DocumentLibrary','${file.UniqueId}')">
             <img src=${editIcon} alt="Preview"/>
                Version History
-          </li>   
+          </li>    
         </ul>
       `;
       card.appendChild(menu);
@@ -3869,7 +3868,7 @@ const createFileCardForDocumentLibrary=(file:any,fileIcon:any,siteID:string,IsHa
 
 // This function will call onclick of version history popup
 // @ts-ignore
-window.versionHistory=async(fileName:string,folderPath:string,siteId:string,flag:string)=>{
+window.versionHistory=async(fileName:string,folderPath:string,siteId:string,flag:string,fileId:any)=>{
   // main code i shere
   console.log("fileName",fileName)
   console.log("folderPath",folderPath)
@@ -3880,7 +3879,7 @@ window.versionHistory=async(fileName:string,folderPath:string,siteId:string,flag
   }else{
     filePath=`${folderPath}/${fileName}`
   }
-  
+ 
   try {
     // Get the file object
     // let filePath = '/sites/AlRostmani/TestHub/DL1/PermissonTest1.doc'
@@ -3905,10 +3904,11 @@ window.versionHistory=async(fileName:string,folderPath:string,siteId:string,flag
           "IsCurrentVersion",
           "Size",
           "Url",
-          "VersionLabel"
+          "VersionLabel",
+          "FileRef"
         )
         .expand("CreatedBy")();
- 
+        console.log("historicalVersions[0] url",`${historicalVersions[0]["odata.id"].split('/_api/')[0]}/${historicalVersions[0].Url}`);
       // Fetch current version details
       const currentFileDetails = await file
         .select(
@@ -3924,7 +3924,7 @@ window.versionHistory=async(fileName:string,folderPath:string,siteId:string,flag
         ID: historicalVersions.length + 1, // Current version appears last
         VersionLabel: `${historicalVersions.length + 1}.0`, // Example label
         CheckInComment: "N/A", // No check-in comment for current version
-        Created: itemDetails.Created,
+        Created: itemDetails.Modified,
         CreatedBy: {
           Title: itemDetails?.Editor?.Title,
           Id:  itemDetails?.Editor?.ID,
@@ -3981,7 +3981,6 @@ window.versionHistory=async(fileName:string,folderPath:string,siteId:string,flag
         <th style="border-bottom: 2px solid #ccc; text-align: left; padding: 8px;">Version No</th>
         <th style="border-bottom: 2px solid #ccc; text-align: left; padding: 8px;">Modified</th>
         <th style="border-bottom: 2px solid #ccc; text-align: left; padding: 8px;">Modified By</th>
-        <th style="border-bottom: 2px solid #ccc; text-align: left; padding: 8px;">Expiring In</th>
         <th style="border-bottom: 2px solid #ccc; text-align: left; padding: 8px;">Size</th>
       </tr>
     </thead>
@@ -3990,12 +3989,23 @@ window.versionHistory=async(fileName:string,folderPath:string,siteId:string,flag
         .map(
           (version) => `
         <tr>
-          <td style="padding: 8px; border-bottom: 1px solid #eee;">${version.VersionLabel}</td>
+        ${version.IsCurrentVersion ? `<td style="padding: 8px; border-bottom: 1px solid #eee;">
+            <a href="javascript:void(0);"
+              style="text-decoration: none; color: blue; cursor: pointer;"
+              onclick="Download('${fileId}','${siteId}')"
+              >
+              ${version?.VersionLabel}
+            </a>
+          </td>` : `<td style="padding: 8px; border-bottom: 1px solid #eee;">
+            <a href="${version["odata.id"]?.split('/_api/')[0]}/${version?.Url}"
+              style="text-decoration: none; color: blue; cursor: pointer;">
+              ${version?.VersionLabel}
+            </a>
+          </td>`}
           <td style="padding: 8px; border-bottom: 1px solid #eee;">${new Date(
             version.Created
           ).toLocaleString()}</td>
           <td style="padding: 8px; border-bottom: 1px solid #eee;">${version.CreatedBy.Title}</td>
-          <td style="padding: 8px; border-bottom: 1px solid #eee;">Never expires</td>
           <td style="padding: 8px; border-bottom: 1px solid #eee;">${((version.Size as unknown as number) / (1024 * 1024)).toFixed(2)} MB</td>
         </tr>
       `
@@ -4020,6 +4030,7 @@ window.versionHistory=async(fileName:string,folderPath:string,siteId:string,flag
       throw error;
     }
 }
+
   // Helper function to determine the file icon based on file extension
   // const getFileIcon = (fileName: string) => {
   //   console.log(fileName , "filenmae")
@@ -4525,8 +4536,9 @@ window.versionHistory=async(fileName:string,folderPath:string,siteId:string,flag
 
 
 //   };
-window.PreviewFile = function(path :any , SiteID:any , docLibName:any,flag:string , filepreviewurl){
+window.PreviewFile = function(path :any , SiteID:any , docLibName:any,status:string , filepreviewurl){
   // console.log(docLibName , "docLibName")
+  console.log("Status",status);
   console.log(filepreviewurl , "filepreviewurl")
   console.log("path",path);
   const segments = path.split('/');
@@ -4590,6 +4602,8 @@ window.PreviewFile = function(path :any , SiteID:any , docLibName:any,flag:strin
             if (iframeDocument) {
               const button = iframeDocument.getElementById("OneUpCommandBar") as HTMLElement;
               const excelToolbar = iframeDocument.getElementById("m_excelEmbedRenderer_m_ewaEmbedViewerBar") as HTMLElement;
+              // const openInAppButton=iframeDocument.getElementById('openCommandGroup') as HTMLButtonElement;
+              // console.log("openInAppButton",openInAppButton);
               if(excelToolbar){
                 excelToolbar.style.display= "none"
               }
@@ -4650,9 +4664,10 @@ window.PreviewFile = function(path :any , SiteID:any , docLibName:any,flag:strin
   }
   if(ismyrequordoclibforfilepreview === "getdoclibdata"){
   // Generate the correct preview URL
-  const previewUrl = `${siteUrl}/sites/IntranetUAT/${currentEntity}/${myactualdoclib}/Forms/AllItems.aspx?id=${path}&parent=${encodedParentFolder}`;
+  // const previewUrl = `${siteUrl}/sites/IntranetUAT/${currentEntity}/${myactualdoclib}/Forms/AllItems.aspx?id=${path}&parent=${encodedParentFolder}`;
   //  const previewUrl = `${siteUrl}/sites/AlRostmanispfx2/${currentEntity}/${myactualdoclib}/Forms/AllItems.aspx?id=${path}&parent=${encodedParentFolder}`;
-    // const previewUrl = `${siteUrl}/sites/AlRostmani/${currentSubsite}/${myactualdoclib}/Forms/AllItems.aspx?id=${path}&parent=${encodedParentFolder}`;
+    const previewUrl = `${siteUrl}${locationPath}/${currentSubsite}/${myactualdoclib}/Forms/AllItems.aspx?id=${path}&parent=${encodedParentFolder}`;
+   
   // const previewUrl = `${siteUrl}/sites/SPFXDemo/${currentEntity}/${myactualdoclib}/Forms/AllItems.aspx?id=${path}&parent=${encodedParentFolder}`;
    
   console.log(previewUrl, "Generated preview URL");
@@ -4675,17 +4690,33 @@ window.PreviewFile = function(path :any , SiteID:any , docLibName:any,flag:strin
               }
               if (button) {
                 console.log("Hiding the OneUpCommandBar element");
-                button.style.display = "none";
-   
-   
-                // spinner.style.display = "none";
+                button.style.display = "block";
+                const commandBar1 = button.querySelectorAll("button");
+                commandBar1.forEach(button => {
+                  button.style.display = "none";
+                });
+                 // Show only the "Open" button
+                const openButton = iframeDocument.getElementById("openCommandGroup");
+                const userProfile = iframeDocument.getElementById("presenceCommand");
+                if(userProfile){
+                  userProfile.style.display='none'
+                }
+                if (openButton) {
+                  // console.log("openButton",openButton);
+                  if(status === 'Auto Approved'){
+                    openButton.style.display = "block";
+                  }
+                 
+                }
                 previewfileframe.style.display = "block";
    
    
               } else {
                 console.log("OneUpCommandBar not found, rechecking...");
               }
-             
+              // if(openInAppButton){
+              //   openInAppButton.style.display='block'
+              // }
               const helpbutton = iframeDocument.getElementById("m_excelEmbedRenderer_m_ewaEmbedViewerBar") as HTMLElement;
               if(helpbutton){
                 helpbutton.style.display = "none"
@@ -7783,7 +7814,7 @@ window.deleteFile = async(fileId:string, siteID:string, IsHardDelete:any, ListTo
           const siteUrl = window.location.origin;
             // const previewUrl = `${siteUrl}/sites/AlRostmani/DMSOrphanDocs/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
             // const previewUrl = `${siteUrl}/sites/AlRostmanispfx2/${currentEntity}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
-           const previewUrl = `${siteUrl}/sites/IntranetUAT/${currentEntity}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
+           const previewUrl = `${siteUrl}${locationPath}/${currentEntity}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
           console.log("previewUrl",previewUrl);
           payload.FilePreviewURL=previewUrl
 
@@ -9438,7 +9469,7 @@ window.toggleFavourite=async (fileId,siteId)=> {
             const parentFolder = file.ServerRelativeUrl.substring(0, file.ServerRelativeUrl.lastIndexOf('/'));
             const siteUrl = window.location.origin;
               // const previewUrl = `${siteUrl}/sites/AlRostmani/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
-             const previewUrl = `${siteUrl}/sites/IntranetUAT/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
+             const previewUrl = `${siteUrl}${locationPath}/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
             //  const previewUrl = `${siteUrl}/sites/AlRostmanispfx2/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
             console.log("previewUrl",previewUrl);
 
@@ -11271,7 +11302,7 @@ window.shareFile=async(fileID:string,siteId:string,currentFolderPathForFile:stri
     // Get the base site URL
     const siteUrl = window.location.origin;
     console.log(siteUrl, "siteUrl");
-    const previewUrl = `${siteUrl}/sites/IntranetUAT/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${filePath}&parent=${encodedParentFolder}`;
+    const previewUrl = `${siteUrl}${locationPath}/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${filePath}&parent=${encodedParentFolder}`;
     // const previewUrl = `${siteUrl}/sites/AlRostmani/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${encodeURIComponent(filePath)}&parent=${encodedParentFolder}`;
     // const previewUrl = `${siteUrl}/sites/AlRostmanispfx2/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${encodeURIComponent(filePath)}&parent=${encodedParentFolder}`;
     preURL=previewUrl;
