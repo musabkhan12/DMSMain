@@ -19,7 +19,10 @@
       ]
     }
   },
-  "externals": {},
+  "externals": {
+    "react": "React",
+    "react-dom": "ReactDOM"
+  },
   "localizedResources": {
     "DmsMusaibWebPartStrings": "lib/webparts/dmsMusaib/loc/{locale}.js",
     "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js",

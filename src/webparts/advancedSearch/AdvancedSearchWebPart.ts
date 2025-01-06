@@ -25,7 +25,13 @@ export default class AdvancedSearchWebPart extends BaseClientSideWebPart<IAdvanc
     const element: React.ReactElement<IAdvancedSearchProps> = React.createElement(
       AdvancedSearch,
       {
-        context:this.context
+        description: this.properties.description,
+        isDarkTheme: this._isDarkTheme,
+        environmentMessage: this._environmentMessage,
+        hasTeamsContext: !!this.context.sdks.microsoftTeams,
+        userDisplayName: this.context.pageContext.user.displayName,
+        context: this.context,
+        siteUrl: this.context.pageContext.web.absoluteUrl,
       }
     );
 

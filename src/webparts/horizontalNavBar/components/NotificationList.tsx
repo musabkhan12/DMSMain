@@ -50,14 +50,14 @@ const NotificationList = ({ NotificationArray, handleNotificationClick, OnCleara
    
         let webUrl = window.location.href;
         const baseUrl = webUrl.substring(0, webUrl.lastIndexOf("/SitePages") + "/SitePages".length);
-        console.log(baseUrl); 
+        console.log(baseUrl , "notification baseurl"); // Output: https://example.com/webUrl/sites/AlRostmani/SitePages
         window.location.href = `${baseUrl}/NotificationDetails.aspx`;
     }
     const goToSettings = () => {
    
         let webUrl = window.location.href;
         const baseUrl = webUrl.substring(0, webUrl.lastIndexOf("/SitePages") + "/SitePages".length);
-        console.log(baseUrl); 
+        console.log(baseUrl); // Output: https://example.com/webUrl/sites/AlRostmani/SitePages
         window.location.href = `${baseUrl}/ManageNotification.aspx`;
     }
     return (
@@ -67,9 +67,9 @@ const NotificationList = ({ NotificationArray, handleNotificationClick, OnCleara
                     <div className="col-md-8">
                         <h5 className="p-1 font-16 text-dark">Notifications</h5>
                     </div>
-                    <div style={{textAlign:'right'}} className="col-md-4">
+                    {/* <div style={{textAlign:'right'}} className="col-md-4">
                     <h5 style={{ textDecoration: 'underline', cursor: 'pointer' }} className="pt-2 font-12" onClick={() => OnClearall('Clear')} >Clear All</h5>
-                    </div>
+                    </div> */}
                 </div>
             </div>
   <div className="heightlist">
@@ -78,17 +78,22 @@ const NotificationList = ({ NotificationArray, handleNotificationClick, OnCleara
                     {/* Today Section */}
                     {categorizedNotifications.today.length > 0 && (
                         <div>
-                            <h6 className="text-muted font-13 fw-normal p-2">Today</h6>
+                            <h6 className="text-dark font-14 fw-bold p-2 pb-0">Today</h6>
                             {categorizedNotifications.today.map((notify) => (
-                                <a key={notify.Id} className="dropdown-item p-0 notify-item card unread-noti shadow-none mb-1"
-                                    onClick={() => handleNotificationClick(notify)} style={{ width: '18rem', display: 'flex', margin: '0 auto' }}>
-                                    <div className="card-body">
-                                        <span className="float-end noti-close-btn text-muted"><i className="mdi mdi-close"></i></span>
+                               
+                                <a key={notify.Id} className="dropdown-item p-2 notify-item card unread-noti shadow-none mb-1"
+                                    onClick={() => handleNotificationClick(notify)} style={{display: 'flex', margin: '0 auto' }}>
+                                    <div className="">
+                                        <span className="float-start noti-close-btn text-muted">
+                                            <img  src={require("../../../CustomAsset/Noti.jpg")}
+                                       
+                                        className="me-1 noti"
+                                      /></span>
                                         <div className="d-flex align-items-center">
                                             <div className="flex-grow-1 text-truncate ms-2">
-                                                <h5 className="noti-item-title fw-semibold font-14" style={{ textTransform: 'capitalize' }}>
+                                                <h5 className="noti-item-title hovertext  fw-semibold font-14 mb-0" style={{ textTransform: 'capitalize' }}>
                                                 {notify.ContentName || notify.ContentComment}
-                                                    <small className="fw-normal text-muted ms-1" style={{ textTransform: 'lowercase' }}>{moment(notify.Created).fromNow()}</small>
+                                                    <small className="fw-normal text-muted ms-0" style={{ textTransform: 'lowercase' }}>{moment(notify.Created).fromNow()}</small>
                                                 </h5>
                                                 <small className="noti-item-subtitle text-muted">{notify?.ActionUser?.Title} {notify.ContentType0} on {notify?.NotifiedUser?.Title}</small>
                                             </div>
@@ -107,17 +112,21 @@ const NotificationList = ({ NotificationArray, handleNotificationClick, OnCleara
                     {/* Yesterday Section */}
                     {categorizedNotifications.yesterday.length > 0 && (
                         <div>
-                            <h6 className="text-muted font-13 fw-normal p-2">Yesterday</h6>
+                            <h6 className="text-dark font-14 fw-bold p-2 pb-0">Yesterday</h6>
                             {categorizedNotifications.yesterday.map((notify) => (
-                                <a key={notify.Id} className="dropdown-item p-0 notify-item card unread-noti shadow-none mb-1"
-                                    onClick={() => handleNotificationClick(notify)} style={{ width: '18rem', display: 'flex', margin: '0px auto' }}>
-                                    <div className="card-body">
-                                        <span className="float-end noti-close-btn text-muted"><i className="mdi mdi-close"></i></span>
+                                <a key={notify.Id} className="dropdown-item p-2 notify-item card unread-noti shadow-none mb-1"
+                                    onClick={() => handleNotificationClick(notify)} style={{ display: 'flex', margin: '0px auto' }}>
+                                    <div className="">
+                                    <span className="float-start noti-close-btn text-muted">
+                                            <img  src={require("../../../CustomAsset/Noti.jpg")}
+                                       
+                                        className="me-1 noti"
+                                      /></span>
                                         <div className="d-flex align-items-center">
                                             <div className="flex-grow-1 text-truncate ms-2">
-                                                <h5 className="noti-item-title fw-semibold font-14" style={{ textTransform: 'capitalize' }}>
+                                                <h5 className="noti-item-title hovertext  fw-semibold font-14 mb-0" style={{ textTransform: 'capitalize' }}>
                                                 {notify.ContentName || notify.ContentComment}
-                                                    <small className="fw-normal text-muted ms-1">{moment(notify.Created).fromNow()}</small>
+                                                    <small className="fw-normal text-muted ms-0">{moment(notify.Created).fromNow()}</small>
                                                 </h5>
                                                 <small className="noti-item-subtitle text-muted">{notify?.ActionUser?.Title} {notify.ContentType0} on {notify?.NotifiedUser?.Title}</small>
                                             </div>
@@ -136,16 +145,20 @@ const NotificationList = ({ NotificationArray, handleNotificationClick, OnCleara
                     {/* Earlier Section */}
                     {categorizedNotifications.earlier.length > 0 && (
                         <div>
-                            <h6 className="text-muted font-13 fw-normal p-2">Earlier</h6>
+                            <h6 className="text-dark font-14 fw-bold p-2 pb-0">Earlier</h6>
                             {categorizedNotifications.earlier.map((notify) => (
-                                <a key={notify.Id} className="dropdown-item p-0 notify-item card unread-noti shadow-none mb-1"
-                                    onClick={() => handleNotificationClick(notify)} style={{ width: '18rem', display: 'flex', margin: '0px auto' }}>
-                                    <div className="card-body">
-                                        <span className="float-end noti-close-btn text-muted"><i className="mdi mdi-close"></i></span>
+                                <a key={notify.Id} className="dropdown-item p-2 notify-item card unread-noti shadow-none mb-1"
+                                    onClick={() => handleNotificationClick(notify)} style={{ display: 'flex', margin: '0px auto' }}>
+                                    <div className="">
+                                    <span className="float-start noti-close-btn text-muted">
+                                            <img  src={require("../../../CustomAsset/Noti.jpg")}
+                                       
+               className="me-1 noti"
+                                      /></span>
                                         <div className="d-flex align-items-center">
                                             <div className="flex-grow-1 text-truncate ms-2">
-                                                <h5 className="noti-item-title fw-semibold font-14" style={{ textTransform: 'capitalize' }}>
-                                                {notify.ContentName || notify.ContentComment} <small className="fw-normal text-muted ms-1">{moment(notify.Created).fromNow()}</small>
+                                                <h5 className="noti-item-title hovertext  fw-semibold font-14 mb-0" style={{ textTransform: 'capitalize' }}>
+                                                {notify.ContentName || notify.ContentComment} <small className="fw-normal text-muted ms-0">{moment(notify.Created).fromNow()}</small>
                                                 </h5>
                                                 <small className="noti-item-subtitle text-muted">{notify?.ActionUser?.Title} {notify.ContentType0} on {notify?.NotifiedUser?.Title}</small>
                                             </div>
@@ -165,8 +178,8 @@ const NotificationList = ({ NotificationArray, handleNotificationClick, OnCleara
                 <p>No notifications</p>
             )}
         </div>
-        <h5 style={{textDecoration:'underline',float:'left'}} className="p-1 font-12 text-center" onClick={goToNext}>View All</h5>
-        <h5 style={{float:'right'}} className="p-1 font-12 text-center" onClick={goToSettings}> <Settings size={18} /> </h5>
+        <h5 style={{textDecoration:'underline',float:'left'}} className="p-3 font-12 hovertext mb-0 text-center" onClick={goToNext}>View All</h5>
+        <h5 style={{float:'right'}} className="p-3 font-12 text-center mb-0" onClick={goToSettings}> <Settings size={18} /> </h5>
         </div>
     );
 };

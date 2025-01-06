@@ -1,5 +1,11 @@
 import { BaseWebPartContext } from "@microsoft/sp-webpart-base";
 
 export interface IAdvancedSearchProps {
-    context:BaseWebPartContext
+    description: string;
+  isDarkTheme: boolean;
+  environmentMessage: string;
+  hasTeamsContext: boolean;
+  userDisplayName: string;
+  context: any;
+  siteUrl: string;
 }

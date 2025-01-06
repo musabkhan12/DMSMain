@@ -3855,10 +3855,12 @@ const createFileCardForDocumentLibrary=(file:any,fileIcon:any,siteID:string,IsHa
           <li onclick="shareFile('${file.UniqueId}','${siteID}','${FolderPath}','${file.Name}','DocumentLibrary','${file.MajorVersion}','${((file.Length as unknown as number) / (1024 * 1024)).toFixed(2)}','${file.ListItemAllFields.Status}','','${currentDocumentLibrary}')">
           <img src=${ShareFile} alt="Share"/> Share
           </li>
-          <li onclick="versionHistory('${file.Name}', '${file.ServerRelativeUrl}', '${siteID}' ,'DocumentLibrary','${file.UniqueId}')">
-            <img src=${editIcon} alt="Preview"/>
-               Version History
-          </li>    
+          ${file.ListItemAllFields.Status === 'Auto Approved' ? `  
+               <li onclick="versionHistory('${file.Name}', '${file.ServerRelativeUrl}', '${siteID}' ,'DocumentLibrary','${file.UniqueId}')">
+                  <img src=${editIcon} alt="Preview"/>
+                    Version History
+               </li>
+              ` : ` `}  
         </ul>
       `;
       card.appendChild(menu);
@@ -12883,7 +12885,7 @@ librarydiv.appendChild(mainContainer)
       <VerticalSideBar _context={sp} />
     </div>
     <div className="content-page">
-      <HorizontalNavbar _context={sp}/>
+      <HorizontalNavbar _context={sp}  siteUrl={props.siteUrl}/>
       <div className="content" style={{marginLeft: `${!useHide ? '240px' : '80px'}`,marginTop:'0.8rem'}}>
        
       <div className="container-fluid  paddb">

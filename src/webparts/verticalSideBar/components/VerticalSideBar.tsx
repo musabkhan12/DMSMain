@@ -28,7 +28,7 @@ interface NavItem {
 }
 
 const VerticalContext = ({ _context }: any) => {
-  console.log(_context);
+  console.log(_context , "_context is here");
   // const graph = graphfi(...);
   const sp: SPFI = getSP();
   console.log(sp, 'sp');
