@@ -8,6 +8,15 @@
   // box-shadow: 0 0 1px var(--grey-color-light);
   transition: all 0.5s ease;
 }
+.newline{padding-top: 10px;}
+.newline .form-check {
+  display: inline-block;
+  margin: 5px 26px 10px 0px;
+  padding: 0px 0px 0px 0px;
+  font-size: 14px;
+}
+.search_bar span{padding-left: 20px; color: #3c3c3c !important;}
+.search_bar span:hover{color: #1fb0e5 !important;}
 .tabcss {
   background: #f7fbfc !important;
   border-radius: 2rem;
@@ -858,7 +867,7 @@ span.navlink:hover {
   }
   .search_bar {
   
-    width: 230px;
+   
     display: block; 
 }
 .navcss
@@ -984,7 +993,7 @@ span.navlink:hover {
   }
   .search_bar {
 
-    width: 230px;
+   
     display: block; 
 
 }

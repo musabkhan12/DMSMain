@@ -46,7 +46,7 @@ const CreateFolder: React.FC<CreateFolderProps> = ({
   
 
 
-  
+  let locationPath=window.location.pathname.match(/\/sites\/[^\/]+/)[0];
   // new code for permission.
   // const [permission, setPermission]=React.useState(false);
 
@@ -558,7 +558,7 @@ const CreateFolder: React.FC<CreateFolderProps> = ({
       if(OthProps.DocumentLibrary === ""){
         (payloadForFolderMaster as any).DocumentLibraryName=folderName;
         //  (payloadForFolderMaster as any).FolderPath=`/sites/IntranetUAT/${OthProps.Entity}/${folderName}`;
-         (payloadForFolderMaster as any).FolderPath=`/sites/AlRostmanispfx2/${OthProps.Entity}/${folderName}`;
+         (payloadForFolderMaster as any).FolderPath=`${locationPath}/${OthProps.Entity}/${folderName}`;
         // (payloadForFolderMaster as any).FolderPath=`/sites/AlRostmani/${OthProps.Entity}/${folderName}`;
         (payloadForFolderMaster as any).IsLibrary=true;
 

@@ -1,6 +1,6 @@
 declare global {
   interface Window {
-    managePermission: (DocumentLibraryName: string, SiteTilte: string, SiteID: string, folderName: any, folderPath: any) => void;
+    // managePermission: (DocumentLibraryName: string, SiteTilte: string, SiteID: string, folderName: any, folderPath: any) => void;
     manageWorkflow: (DocumentLibraryName: string, SiteTilte: string, SiteID: string) => void;
     view: (message: string) => void;
     PreviewFile: (path: string, siteID: string, docLibName: any, filemasterlist: any, filepreview: any) => void;
@@ -178,6 +178,7 @@ let routeToDiffSideBar = "";
 const ArgPoc = ({ props }: any) => {
   const sp: SPFI = getSP();
   // console.log(sp, "sp");
+  let locationPath=window.location.pathname.match(/\/sites\/[^\/]+/)[0];
   const [showDeletepopup, setShowDeletepopup] = useState(false);
   const [activeButton] = React.useState<string>("");
   const { useHide }: any = React.useContext(UserContext);
@@ -2364,7 +2365,7 @@ const ArgPoc = ({ props }: any) => {
     debugger
       let graphcl=await (props.context as BaseWebPartContext).msGraphClientFactory.getClient("3");
       let mssearch=new GraphSearchHelper(graphcl);
-      // let searchres=await mssearch.searchFiles("IsDocument:True Path:https://officeindia.sharepoint.com/sites/AlRostmani/TestHub",100);    
+   
       debugger
   }
   const runSearch = async (searhcpath?: string,filters:string='') => {
@@ -2380,7 +2381,7 @@ const ArgPoc = ({ props }: any) => {
       //   // Querytext: `${searchText} IsDocument:True Path:"${(searhcpath) ? searhcpath : searchQueryPath}"`,
 
       //   Querytext:"",
-      //   QueryTemplate: "IsDocument=True Path:\"https://officeindia.sharepoint.com/sites/AlRostmani/TestHub/\"*",
+   
       //   RowLimit: 20,
       //   SelectProperties: ["Title", "Path", "FileExtension", "UniqueId", "Size", "Created", "Modified", "Author", "ModifiedBy"],
       //   SourceId: "eff79881-1eb9-4f5e-bba5-86d48c22960c",
@@ -2393,7 +2394,7 @@ const ArgPoc = ({ props }: any) => {
       let qyerytext=`${searchText} IsDocument:True ${filters} Path:"${(searhcpath) ? searhcpath : searchQueryPath}"`;
       let graphcl=await (props.context as BaseWebPartContext).msGraphClientFactory.getClient("3");
       let mssearch=new GraphSearchHelper(graphcl);
-      // let searchres=await mssearch.searchFiles("IsDocument:True Path:https://officeindia.sharepoint.com/sites/AlRostmani/TestHub",100);
+    
       let searchres=await mssearch.searchFiles(qyerytext,500);
 
       let resultsdoc: IDocumentDisplayFields[] = searchres.map(filehit => {
@@ -3850,8 +3851,8 @@ const ArgPoc = ({ props }: any) => {
         const parentFolder = file.ServerRelativeUrl.substring(0, file.ServerRelativeUrl.lastIndexOf('/'));
         const siteUrl = window.location.origin;
         // const previewUrl = `${siteUrl}/sites/AlRostmani/DMSOrphanDocs/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
-         const previewUrl = `${siteUrl}/sites/AlRostmanispfx2/${currentEntity}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
-        // const previewUrl = `${siteUrl}/sites/IntranetUAT/${currentEntity}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
+        //  const previewUrl = `${siteUrl}/sites/AlRostmanispfx2/${currentEntity}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
+        const previewUrl = `${siteUrl}${locationPath}/${currentEntity}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
         console.log("previewUrl", previewUrl);
         payload.FilePreviewURL = previewUrl
 
@@ -4779,8 +4780,8 @@ const ArgPoc = ({ props }: any) => {
           const parentFolder = file.ServerRelativeUrl.substring(0, file.ServerRelativeUrl.lastIndexOf('/'));
           const siteUrl = window.location.origin;
           // const previewUrl = `${siteUrl}/sites/AlRostmani/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
-          // const previewUrl = `${siteUrl}/sites/IntranetUAT/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
-           const previewUrl = `${siteUrl}/sites/AlRostmanispfx2/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
+          const previewUrl = `${siteUrl}${locationPath}/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
+          //  const previewUrl = `${siteUrl}/sites/AlRostmanispfx2/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
           console.log("previewUrl", previewUrl);
 
           payload.FilePreviewURL = previewUrl
@@ -4923,8 +4924,8 @@ const ArgPoc = ({ props }: any) => {
           const encodedFilePath = encodeURIComponent(file.ServerRelativeUrl);
           const parentFolder = file.ServerRelativeUrl.substring(0, file.ServerRelativeUrl.lastIndexOf('/'));
           const siteUrl = window.location.origin;
-          // const previewUrl = `${siteUrl}/sites/IntranetUAT/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
-           const previewUrl = `${siteUrl}/sites/AlRostmanispfx2/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
+          const previewUrl = `${siteUrl}${locationPath}/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
+          //  const previewUrl = `${siteUrl}/sites/AlRostmanispfx2/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
           // const previewUrl = `${siteUrl}/sites/AlRostmani/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
           // const previewUrl = `${siteUrl}/sites/SPFXDemo/${currentEntity}/${currentDocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
           console.log("previewUrl", previewUrl);

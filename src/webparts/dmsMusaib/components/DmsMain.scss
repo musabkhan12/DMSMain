@@ -514,20 +514,33 @@ a:hover
 
 
 /*Edit pop Css*/
-.edit-popup {
+.blur-backround{
+  width: 600px;
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    position: relative;
+}
+#renameForm button{margin-top: 0px !important;}
+.edit-popup,#rename-popup,#renamePopup {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 50%;
-  max-width: 600px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  z-index: 99999;
-  min-width:60%;
-  max-height: 550px; overflow-y: auto;
+
+  width: 100%;
+z-index: 99999;
+ 
+top: 0;
+  background: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  height: 100%;  
+  display: flex
+  ;
+      justify-content: center;
+      align-items: center;
+ 
+}
+#addMetaColumn-wrapper .bi-plus{
+  top: -46px !important; left: 1rem !important;
+
 }
  #files-container button{    position: absolute;
   right: 28px;
@@ -588,14 +601,14 @@ a:hover
  
 /* Buttons (Save and Cancel) */
 .edit-popup button {
-  padding: 10px 20px;
+  padding: 6px 20px;
   margin-top: 0px;
   background-color: #4CAF50;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 16px; float:right;
+  font-size: 14px; float:right;
 }
  
 .edit-popup button:hover {

@@ -9,11 +9,7 @@ import { SPFI } from '@pnp/sp';
 import { getSP } from '../loc/pnpjsConfig';
 import { useRef, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
-import { addActivityLeaderboard, 
-  getARGNotificationHistory, 
-  getCurrentUserName, getCurrentUserProfileEmail,
-   UpdateNotification, 
-   updateNotifications } from '../../../APISearvice/CustomService';
+import { addActivityLeaderboard, getARGNotificationHistory, getCurrentUserName, getCurrentUserProfileEmail, UpdateNotification, updateNotifications } from '../../../APISearvice/CustomService';
 import "../../../CustomCss/mainCustom.scss"
 import moment from 'moment';
 // import NotificationList from '../../../CustomJSComponents/CustomForm/NotificationList';
@@ -68,7 +64,7 @@ const HorizontalNavbar = ({ _context, siteUrl }: any) => {
   const [currentUser, setCurrentUser] = React.useState("")
   const [currentUserEmail, setCurrentUserEmail] = React.useState("")
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-
+  const [loading, setLoading] = useState(false);
   // Helper function to generate unique IDs
   const generateId = () => Math.floor(Math.random() * 100000);
   const [issearchOpen, setIsSearchOpen] = React.useState(false);
@@ -80,7 +76,12 @@ const HorizontalNavbar = ({ _context, siteUrl }: any) => {
   const [results, setResults] = useState([]);
   const [NotificationArray, setNotificationArray] = useState([]);
   const menuRef = useRef(null);
+  const notref = useRef(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  let showdropdown:boolean = false;
+
+  const dmssiteUrl = window.location.origin;
+  let locationPath=window.location.pathname.match(/\/sites\/[^\/]+/)[0];
   function groupByFn(array: any, keyGetter: any) {
     return array.reduce((result: any, currentItem: any) => {
       const key = keyGetter(currentItem);
@@ -112,6 +113,9 @@ const HorizontalNavbar = ({ _context, siteUrl }: any) => {
     const handleClickOutside = (event: { target: any; }) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setIsMenuOpen(false);
+      }
+      if (notref.current && !notref.current.contains(event.target)) {
+        setIsSearchOpen(false);
       }
     };
 
@@ -255,10 +259,15 @@ const HorizontalNavbar = ({ _context, siteUrl }: any) => {
 
   const searchKeyPress = async (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
+   let arr:any[] =[];
     const queryText = e.target.value;
     setQuery(queryText);
-
+    if (queryText.length < 2){
+      setSearchResults(arr);
+    }
     if (queryText && queryText.length > 2) {
+      showdropdown = true;
+      setLoading(true);
       const searchResults = await searchAllLists(queryText);
       let grped = groupByFn(searchResults, (res: any) => res.ListTitle)
       console.log("grped results", grped);
@@ -266,6 +275,7 @@ const HorizontalNavbar = ({ _context, siteUrl }: any) => {
       setGroupedSearchResults(grped);
       console.log("grouped resuls after fncall", groupedSearchResults);
     }
+    setLoading(false);
   };
   const handleSearchClick = async (result: any) => {
 
@@ -285,7 +295,7 @@ const HorizontalNavbar = ({ _context, siteUrl }: any) => {
     console.log("replaytext", replyText);
     let res: any[] = [];
     if (replyText == 'Clear') {
-      await updateNotifications(_context).then((x:any) => {
+      await updateNotifications(_context).then((x) => {
         setNotificationArray(res);
         console.log("isUpdated", res, x);
       })
@@ -346,8 +356,8 @@ const HorizontalNavbar = ({ _context, siteUrl }: any) => {
         <div className="" onClick={() => handleSidebarToggle(useHide)}>
           <div className={` ${useHide ? 'sidebar-closedBar' : 'sidebar-openBa'}`} onClick={() => handleSidebarToggle(useHide)}>
             <div className="" onClick={() => handleSidebarToggle(useHide)}>
-              <Menu size={22} className='desktoView' />
-              <Menu size={80} className='searchcssmobile' />
+              <Menu size={22} className='desktoView newi'/>
+              <Menu size={80} className='searchcssmobile newi'/>
             </div>
           </div>
         </div>
@@ -359,56 +369,105 @@ const HorizontalNavbar = ({ _context, siteUrl }: any) => {
               value={query} className='searchcss desktoView'
               onChange={(e) => searchKeyPress(e)}
               onClick={toggleSearchDropdown}
-              placeholder="Search..."
+              
+              
             />
+            {query === "" && (
+            <span
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent input's onClick
+                window.open(
+                  `${dmssiteUrl}${locationPath}/SitePages/DMSAdvanceSearch.aspx`,
+
+                  "_blank"
+                );
+              }}
+              style={{
+                position: 'absolute',
+                top: '50%',
+                // left: '10px',
+                transform: 'translateY(-50%)',
+                zIndex: 3,
+                color: '#aaa',
+                cursor: 'pointer',
+              }}
+            >
+              Click here for advance search
+            </span>
+            )}
           </div>
           <div className="dropdown">
             <Search className='searchcssmobile' size='80' onClick={toggleSearchDropdown} />
 
             <div id="myDropdown" className={`dropdown-content ${issearchOpen ? 'show' : ''}`}>
 
-              <input
+              {/* <input
                 type="text"
                 value={query}
                 className='searchcss searchcssmobile'
                 onChange={(e) => searchKeyPress(e)}
                 placeholder="Search..."
-              />
-              <div className={searchResults.length > 0 ? 'search-results' : ''}>
-
-                <div className={searchResults.length > 0 ? 'scrollbar' : ''} id={searchResults.length > 0 ? 'style-6' : ''}>
-                  {searchResults.length > 0 && <span className='alifnsearch' style={{ padding: '0.85rem' }}>Found {searchResults.length} results</span>}
-                  {console.log("grped searchResults dropfown", groupedSearchResults)}
-                  {searchResults.length > 0 ? (
-
-
-                    Object.keys(groupedSearchResults).map((grpreskey: any, grpind: number) => (
-
-                      <div>
-                        <div className='alifnsearch1' key={grpind}>{ListTitleTiSearchCategoryMapping[grpreskey]}({groupedSearchResults[grpreskey].length})</div>
-                        {
-                          groupedSearchResults[grpreskey].map((result: any, index: any) => (
-                            <div key={index} className="search-result-item">
-                              <a onClick={() => handleSearchClick(result)} style={{ padding: '0.85rem' }}>
-                                <h4 className='eclipcsss text-dark' style={{ fontSize: '16px' }}>{result.Title || result.ProjectName || result.EventName || result.Contentpost}</h4>
-                                {/* {result.Description && <p dangerouslySetInnerHTML={{ __html: result.Description }}></p>} */}
-                                {result.Overview && <p className='eclipcsss text-muted' style={{ fontSize: '14px' }}>{result.Overview}</p>}
-                                {result.EventAgenda && <p className='eclipcsss text-muted' style={{ fontSize: '14px' }}>{result.EventAgenda}</p>}
-                              </a>
-                            </div>
-
-                          ))
-                        }
-                      </div>
-
-
-                    ))
-
-                  ) : (
-                    null
-                  )}
-                  <div className="force-overflow"></div>
+              /> */}
+              <div className={searchResults.length > 0 ? 'search-results' : ''} ref={notref}>
+                {/* searchResults.length > 0 ? 'search-results' : '' */}
+                <div className={loading ? 'scrollbar' : ''} id={loading ? 'style-6' : ''}>
+                {loading && (
+                  <div className="loadernewadd">
+                    <div>
+                      <img style={{ width: '60px' }}
+                        src={require("../../../CustomAsset/birdloader.gif")}
+                        className="alignrightl"
+                        alt="Loading..."
+                      />
+                    </div>
+                    <div className="loadnewarg">
+                      <span>Loading </span>{" "}
+                      <span>
+                        <img style={{ width: '35px' }}
+                          src={require("../../../CustomAsset/argloader.gif")}
+                          className="alignrightl"
+                          alt="Loading..."
+                        />
+                      </span>
+                    </div>
+                  </div>
+                )}
                 </div>
+                {!loading && (
+                  <div className={'scrollbar' } id={searchResults.length > 0 ? 'style-6' : ''}>
+                    {searchResults.length > 0 && <span className='alifnsearch' style={{ padding: '0.85rem' }}>Found {searchResults.length} results</span>}
+                    {console.log("grped searchResults dropfown", groupedSearchResults)}
+                    {searchResults.length > 0 ? (
+
+
+                      Object.keys(groupedSearchResults).map((grpreskey: any, grpind: number) => (
+
+                        <div>
+                          <div className='alifnsearch1' key={grpind}>{ListTitleTiSearchCategoryMapping[grpreskey]}({groupedSearchResults[grpreskey].length})</div>
+                          {
+                            groupedSearchResults[grpreskey].map((result: any, index: any) => (
+                              <div key={index} className="search-result-item">
+                                <a onClick={() => handleSearchClick(result)} style={{ padding: '0.85rem' }}>
+                                  <h4 className='eclipcsss text-dark' style={{ fontSize: '16px' }}>{result.Title || result.ProjectName || result.EventName || result.Contentpost}</h4>
+                                  {/* {result.Description && <p dangerouslySetInnerHTML={{ __html: result.Description }}></p>} */}
+                                  {result.Overview && <p className='eclipcsss text-muted' style={{ fontSize: '14px' }}>{result.Overview}</p>}
+                                  {result.EventAgenda && <p className='eclipcsss text-muted' style={{ fontSize: '14px' }}>{result.EventAgenda}</p>}
+                                </a>
+                              </div>
+
+                            ))
+                          }
+                        </div>
+
+
+                      ))
+
+                    ) : (
+                      "No records found"
+                    )}
+                    <div className="force-overflow"></div>
+                  </div>
+                )}
               </div>
 
             </div>
@@ -423,12 +482,12 @@ const HorizontalNavbar = ({ _context, siteUrl }: any) => {
             </a>
 
             {isMenuOpen &&
-            <div id="myDropdownBell" className={`dropdown-content  ${isOpenBell ? 'show desktoView' : ''}`} style={{ width: '320px' }} ref={menuRef}>
+              <div id="myDropdownBell" className={`dropdown-content  ${isOpenBell ? 'show desktoView' : ''}`} style={{ width: '370px' }} ref={menuRef}>
 
 
-              <NotificationList NotificationArray={NotificationArray} handleNotificationClick={handleNotificationClick} OnClearall={OnClearall} />
+                <NotificationList NotificationArray={NotificationArray} handleNotificationClick={handleNotificationClick} OnClearall={OnClearall} />
 
-            </div>
+              </div>
             }
           </div>
           {/* <Moon size='22' className={isDarkMode ? 'bx bx-moon desktoView' : 'bx bx-sun desktoView'} onClick={handleThemeToggle} /> */}
@@ -442,15 +501,15 @@ const HorizontalNavbar = ({ _context, siteUrl }: any) => {
             </div> */}
           </div>
           <div className="dropdown">
-            <div className='d-flex' onClick={toggleDropdown} style={{ gap: '2px', cursor: 'pointer' }}>
+            <div className='d-flex newalinc' onClick={toggleDropdown} style={{ gap: '2px'}}>
               <div >
 
                 <img src={`${siteUrl}/_layouts/15/userphoto.aspx?size=M&accountname=${currentUserEmail}`}
                   className="rounded-circlecss img-thumbnail desktoView 
                                   avatar-xl"
                   alt="profile-image"
-                  style={{ cursor: "pointer" }} />
-                <img src={`${siteUrl}/_layouts/15/userphoto.aspx?size=M&accountname=${currentUser}`}
+                  />
+                <img src={`${siteUrl}/_layouts/15/userphoto.aspx?size=M&accountname=${currentUserEmail}`}
                   className="rounded-circlecss img-thumbnail searchcssmobile 
                                   avatar-xl"
                   alt="profile-image"
@@ -468,7 +527,7 @@ const HorizontalNavbar = ({ _context, siteUrl }: any) => {
               <a href="#contact">Contact</a>
             </div> */}
           </div>
-          <svg style={{ opacity: '0.6', cursor: 'pointer' }} width="33px" height="35px" viewBox="0 -0.5 25 25" fill="none" xmlns="http://www.w3.org/2000/svg" onClick={() => logout()}>
+          <svg className='logoutop' style={{ opacity: '0.6', cursor: 'pointer' }} width="33px" height="35px" viewBox="0 -0.5 25 25" fill="none" xmlns="http://www.w3.org/2000/svg" onClick={() => logout()}>
             <path d="M11.75 9.874C11.75 10.2882 12.0858 10.624 12.5 10.624C12.9142 10.624 13.25 10.2882 13.25 9.874H11.75ZM13.25 4C13.25 3.58579 12.9142 3.25 12.5 3.25C12.0858 3.25 11.75 3.58579 11.75 4H13.25ZM9.81082 6.66156C10.1878 6.48991 10.3542 6.04515 10.1826 5.66818C10.0109 5.29121 9.56615 5.12478 9.18918 5.29644L9.81082 6.66156ZM5.5 12.16L4.7499 12.1561L4.75005 12.1687L5.5 12.16ZM12.5 19L12.5086 18.25C12.5029 18.25 12.4971 18.25 12.4914 18.25L12.5 19ZM19.5 12.16L20.2501 12.1687L20.25 12.1561L19.5 12.16ZM15.8108 5.29644C15.4338 5.12478 14.9891 5.29121 14.8174 5.66818C14.6458 6.04515 14.8122 6.48991 15.1892 6.66156L15.8108 5.29644ZM13.25 9.874V4H11.75V9.874H13.25ZM9.18918 5.29644C6.49843 6.52171 4.7655 9.19951 4.75001 12.1561L6.24999 12.1639C6.26242 9.79237 7.65246 7.6444 9.81082 6.66156L9.18918 5.29644ZM4.75005 12.1687C4.79935 16.4046 8.27278 19.7986 12.5086 19.75L12.4914 18.25C9.08384 18.2892 6.28961 15.5588 6.24995 12.1513L4.75005 12.1687ZM12.4914 19.75C16.7272 19.7986 20.2007 16.4046 20.2499 12.1687L18.7501 12.1513C18.7104 15.5588 15.9162 18.2892 12.5086 18.25L12.4914 19.75ZM20.25 12.1561C20.2345 9.19951 18.5016 6.52171 15.8108 5.29644L15.1892 6.66156C17.3475 7.6444 18.7376 9.79237 18.75 12.1639L20.25 12.1561Z" fill="#000000" />
           </svg>
           {/* <Settings className='bx bx-user desktoView' size='22' />
@@ -480,6 +539,8 @@ const HorizontalNavbar = ({ _context, siteUrl }: any) => {
 };
 
 export default HorizontalNavbar;
+
+
 // // HorizontalNavbar.tsx
 // import * as React from 'react';
 // import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

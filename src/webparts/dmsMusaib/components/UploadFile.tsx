@@ -34,7 +34,7 @@ submitButton.type="submit";
 
 const UploadFile: React.FC<UploadFileProps> = ({ currentfolderpath , onReturnToMain  }) => {
   const sp: SPFI = getSP();
- 
+  let locationPath=window.location.pathname.match(/\/sites\/[^\/]+/)[0];
   // check whether folder is private or public and save state
   const checkfolderprivace = async() =>{
     const folderItems = await sp.web.lists.getByTitle("DMSPreviewFormMaster")
@@ -143,8 +143,8 @@ console.log("documentLibraryName" , documentLibraryName)
     const siteUrl = window.location.origin;
 
     //  const previewUrl = `${siteUrl}/sites/AlRostmani/DMSOrphanDocs/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
-     const previewUrl = `${siteUrl}/sites/AlRostmanispfx2/DMSOrphanDocs/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
-      // const previewUrl = `${siteUrl}/sites/IntranetUAT/DMSOrphanDocs/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
+    //  const previewUrl = `${siteUrl}/sites/AlRostmanispfx2/DMSOrphanDocs/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
+      const previewUrl = `${siteUrl}${locationPath}/DMSOrphanDocs/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
     console.log("Generated Preview URL:", previewUrl);
    if(previewUrl){
     console.log("enter herr")
@@ -511,6 +511,25 @@ React.useEffect(()=>{
 
 
 // };
+const getUniqueRequestNo = async () => {
+  const counterItem = await sp.web.lists.getByTitle('DMSFileCounterList').items.getById(1)();
+  console.log("Counter Item 0", counterItem);
+  console.log("Counter Item 1", counterItem.FileCount);
+  let fileCounter = counterItem.FileCount;
+
+  // Increment the counter
+  fileCounter++;
+
+  // Generate the new RequestNo
+  const newRequestNo = `File${String(fileCounter).padStart(2, '0')}`;
+
+  // Update the counter in the CounterList
+  await sp.web.lists.getByTitle('DMSFileCounterList').items.getById(1).update({
+    FileCount: fileCounter
+  });
+
+  return newRequestNo;
+};
 
 const handleSubmit = async (event: any) => {
  
@@ -609,8 +628,8 @@ const handleSubmit = async (event: any) => {
       const encodedFilePath = encodeURIComponent(uploadResult.data.ServerRelativeUrl);
       console.log(encodedFilePath , "encodedFilePath")
         // const previewUrl = `${siteUrl}/sites/AlRostmani/${currentfolderpath.Entity}/${currentfolderpath.DocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
-       const previewUrl = `${siteUrl}/sites/AlRostmanispfx2/${currentfolderpath.Entity}/${currentfolderpath.DocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
-        //  const previewUrl = `${siteUrl}/sites/IntranetUAT/${currentfolderpath.Entity}/${currentfolderpath.DocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
+      //  const previewUrl = `${siteUrl}/sites/AlRostmanispfx2/${currentfolderpath.Entity}/${currentfolderpath.DocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
+         const previewUrl = `${siteUrl}${locationPath}/${currentfolderpath.Entity}/${currentfolderpath.DocumentLibrary}/Forms/AllItems.aspx?id=${encodedFilePath}&parent=${encodeURIComponent(parentFolder)}`;
      
       console.log("Generated Preview URL:", previewUrl);
       if (!listItem) throw new Error("List item not found for the uploaded file.");
@@ -627,7 +646,7 @@ const handleSubmit = async (event: any) => {
       await listItem.update(payload);
       console.log("File metadata updated successfully with:", payload);
      
-     
+      const newRequestNo = await getUniqueRequestNo();
       // alert(`status,${status}`);
       const newItem = await sp.web.lists.getByTitle(`DMS${currentfolderpath.Entity}FileMaster`).items.add({
           FileName: String(uploadResult.data.Name),
@@ -642,7 +661,9 @@ const handleSubmit = async (event: any) => {
           DocumentLibraryName:String(currentfolderpath.DocumentLibrary),
           SiteName : String(currentfolderpath.Entity),
           MyRequest: true,
-          RequestNo: `DMS-${uploadResult.data.UniqueId}`
+          Processname : 'New File Request',
+          // RequestNo: `DMS-${uploadResult.data.UniqueId}`
+          RequestNo: newRequestNo
       });
       console.log(newItem, "New item added FileMaster");
  
@@ -659,7 +680,8 @@ const handleSubmit = async (event: any) => {
            FolderPath : String(currentfolderpath.folderpath),
            ApproveAction : String('Submitted'),
            ApprovedLevel : 1,
-           RequestNo: `DMS-${uploadResult.data.UniqueId}`
+           RequestNo: newRequestNo,
+           Processname : 'New File Request',
       })
       }
  

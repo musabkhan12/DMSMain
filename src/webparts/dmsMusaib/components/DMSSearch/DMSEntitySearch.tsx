@@ -36,7 +36,7 @@ export default class DMSEntitySearch extends React.Component<IDMSEntitySearchPro
     this.state = {
     //   searchtext: "",
     //   searchfilter: "",
-    //   searchpath: props.context.pageContext.site.absoluteUrl, //"https://officeindia.sharepoint.com/sites/AlRostmani",
+    
       searchresult: []
     };
   }
@@ -69,7 +69,7 @@ export default class DMSEntitySearch extends React.Component<IDMSEntitySearchPro
     let qyerytext=`${searchtext} IsDocument:True ${searchFilters} Path:"${searchPath}"`;
     let graphcl=await (this.props.context as BaseWebPartContext).msGraphClientFactory.getClient("3");
     let mssearch=new GraphSearchHelper(graphcl);
-    // let searchres=await mssearch.searchFiles("IsDocument:True Path:https://officeindia.sharepoint.com/sites/AlRostmani/TestHub",100);
+    
     let searchres=await mssearch.searchFiles(qyerytext,500);
 
     let resultsdoc: IDocumentDisplayFields[] = searchres.map(filehit => {

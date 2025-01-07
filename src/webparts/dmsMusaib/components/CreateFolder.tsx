@@ -32,6 +32,7 @@ let togglecolumneDetails=true;
 let toggleaddFieldsButton=true;
 let togglefolderPrivacy=true;
 // let toggleApprovalForFolder=true;
+let locationPath=window.location.pathname.match(/\/sites\/[^\/]+/)[0];
 
 const CreateFolder: React.FC<CreateFolderProps> = ({
   OthProps,
@@ -43,7 +44,7 @@ const CreateFolder: React.FC<CreateFolderProps> = ({
   const [approvalOption, setApprovalOption]=useState("");
   console.log("Approval option",approvalOption);
 
-  
+  console.log("Location URL",window.location.pathname.match(/\/sites\/[^\/]+/)[0]);
 
 
   
@@ -258,13 +259,18 @@ const CreateFolder: React.FC<CreateFolderProps> = ({
     const newErrors: { [key: number]: { fieldName?: string; selectField?: string } } = {};
 
     formFields.forEach((field) => {
-      if (!field.fieldName.trim()) {
-        newErrors[field.id] = { ...newErrors[field.id], fieldName: 'Field Name is required' };
-        isValid = false;
-      }
-      if (!field.selectField) {
-        newErrors[field.id] = { ...newErrors[field.id], selectField: 'Field Type is required' };
-        isValid = false;
+      const nonAlphaNumericForEntity = field.fieldName.replace(/[^a-zA-Z0-9 -]/g, '');
+      // if (!field.fieldName.trim()) {
+      //   newErrors[field.id] = { ...newErrors[field.id], fieldName: 'Field Name is required' };
+      //   isValid = false;
+      // }
+      // if (!field.selectField) {
+      //   newErrors[field.id] = { ...newErrors[field.id], selectField: 'Field Type is required' };
+      //   isValid = false;
+      // }
+      if(field.fieldName !== nonAlphaNumericForEntity){
+          newErrors[field.id] = { ...newErrors[field.id], fieldName: 'Special characters are not allowed.' };
+          isValid = false;
       }
     });
 
@@ -291,39 +297,106 @@ const CreateFolder: React.FC<CreateFolderProps> = ({
         // console.log("Site Users",combineUsersArray);
         // setSiteUsers(combineUsersArray);
 
-        // fetch the data from site Gropus
-          const [
-          users,
-          users1,
-          users2,
-          users3,
-          users4,
-        ] = await Promise.all([
-          sp.web.siteGroups.getByName(`${OthProps.Entity}_Read`).users(),
-          sp.web.siteGroups.getByName(`${OthProps.Entity}_Initiator`).users(),
-          sp.web.siteGroups.getByName(`${OthProps.Entity}_Contribute`).users(),
-          sp.web.siteGroups.getByName(`${OthProps.Entity}_Admin`).users(),
-          sp.web.siteGroups.getByName(`${OthProps.Entity}_View`).users(),
-        ]);
-
-        const combineArray = [
-          ...(users || []),
-          ...(users1 || []),
-          ...(users2 || []),
-          ...(users3 || []),
-          ...(users4 || []),
-        ];
-        setSiteUsers(
-          combineArray.map((user) => ( 
-          {
+        if(OthProps.IsExternal === 'true'){
+          const user0 = await sp.web.siteUsers();
+          const user1 = await sp.web.siteGroups();
+          const groupsArray=user1.map((user)=>(
+            {
+            PrincipalType:user.PrincipalType,
             userId:user.Id,
             value: user.Title,
             label: user.Title,
-            email: user.Email,
-          }
-        ))
-        );
-        console.log("combineArray", combineArray);
+            email: user.Title,
+            }
+          ))
+          const combineUsersArray=user0.map((user)=>(
+                {
+                userId:user.Id,
+                value: user.Title,
+                label: user.Title,
+                email: user.Email,
+            }
+          ))
+          let resultArray =[...combineUsersArray, ...groupsArray];
+          console.log("resultArray --->",resultArray)
+          setSiteUsers(resultArray);
+        }else{
+          // fetch the data from site Gropus
+          const [
+            users,
+            users1,
+            users2,
+            users3,
+            users4,
+            users5,
+            users6,
+            users7
+          ] = await Promise.all([
+            sp.web.siteGroups.getByName(`${OthProps.Entity}_Read`).users(),
+            sp.web.siteGroups.getByName(`${OthProps.Entity}_Initiator`).users(),
+            sp.web.siteGroups.getByName(`${OthProps.Entity}_Contribute`).users(),
+            sp.web.siteGroups.getByName(`${OthProps.Entity}_Admin`).users(),
+            sp.web.siteGroups.getByName(`${OthProps.Entity}_View`).users(),
+            sp.web.siteGroups.getByName(`${OthProps.Entity}_AllUsers`).users(),
+            sp.web.siteGroups.getByName(`${OthProps.Entity}_Approval`).users(),
+            sp.web.siteGroups.getByName(`DMSSuper_Admin`).users(),
+          ]);
+  
+          const combineArray = [
+            ...(users || []),
+            ...(users1 || []),
+            ...(users2 || []),
+            ...(users3 || []),
+            ...(users4 || []),
+            ...(users5 || []),
+            ...(users6 || []),
+            ...(users7 || []),
+          ];
+          setSiteUsers(
+            combineArray.map((user) => ( 
+            {
+              userId:user.Id,
+              value: user.Title,
+              label: user.Title,
+              email: user.Email,
+            }
+          ))
+          );
+          console.log("combineArray", combineArray);
+        }
+        // // fetch the data from site Gropus
+        //   const [
+        //   users,
+        //   users1,
+        //   users2,
+        //   users3,
+        //   users4,
+        // ] = await Promise.all([
+        //   sp.web.siteGroups.getByName(`${OthProps.Entity}_Read`).users(),
+        //   sp.web.siteGroups.getByName(`${OthProps.Entity}_Initiator`).users(),
+        //   sp.web.siteGroups.getByName(`${OthProps.Entity}_Contribute`).users(),
+        //   sp.web.siteGroups.getByName(`${OthProps.Entity}_Admin`).users(),
+        //   sp.web.siteGroups.getByName(`${OthProps.Entity}_View`).users(),
+        // ]);
+
+        // const combineArray = [
+        //   ...(users || []),
+        //   ...(users1 || []),
+        //   ...(users2 || []),
+        //   ...(users3 || []),
+        //   ...(users4 || []),
+        // ];
+        // setSiteUsers(
+        //   combineArray.map((user) => ( 
+        //   {
+        //     userId:user.Id,
+        //     value: user.Title,
+        //     label: user.Title,
+        //     email: user.Email,
+        //   }
+        // ))
+        // );
+        // console.log("combineArray", combineArray);
 
     }
     fetchUserFromSitLevel();
@@ -503,7 +576,7 @@ const CreateFolder: React.FC<CreateFolderProps> = ({
     let validateUser=false;
     let formFieldValidation=false;
     // console.log("Handcreate called");
-
+    const nonAlphaNumericForEntity = folderName.replace(/[^a-zA-Z0-9 -]/g, '');
     // Validate the form
     let validationErrors: FormErrors = {};
 
@@ -511,6 +584,12 @@ const CreateFolder: React.FC<CreateFolderProps> = ({
       console.log("create Folder");
       if (!folderName.trim()) {
         validationErrors.folderName = "Folder Name is required.";
+      }
+      if(folderName !== nonAlphaNumericForEntity){
+        validationErrors.folderName = "Special charaters are not allowed.";
+      }
+      if(nonAlphaNumericForEntity.length > 50){
+        validationErrors.folderName = "Input cannot exceed 50 characters in the folder name field.";
       }
       if (!folderOverview.trim()) {
         validationErrors.folderOverview = "Folder Overview is required.";
@@ -520,6 +599,12 @@ const CreateFolder: React.FC<CreateFolderProps> = ({
       console.log("create document library");
       if (!folderName.trim()) {
         validationErrors.folderName = "Folder Name is required.";
+      }
+      if(folderName !== nonAlphaNumericForEntity){
+        validationErrors.folderName = "Special charaters are not allowed.";
+      }
+      if(nonAlphaNumericForEntity.length > 50){
+        validationErrors.folderName = "Input cannot exceed 50 characters in the folder name field.";
       }
       if(!approvalOption.trim()){
         validationErrors.approvalOption = "Approval Option is required.";
@@ -550,9 +635,11 @@ const CreateFolder: React.FC<CreateFolderProps> = ({
     // If errors exist, set them to the state and prevent submission
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
-    }else if(validateColumns){
+    }
+    else if(validateColumns){
         // alert("Add Columns Fields and Type");
-    }else if(validateUser){
+    }
+    else if(validateUser){
         // alert("Please select at least one user");
     }else if(formFieldValidation){
       Swal.fire(
@@ -569,9 +656,10 @@ const CreateFolder: React.FC<CreateFolderProps> = ({
       }
 
       if(OthProps.DocumentLibrary === ""){
-        (payloadForFolderMaster as any).DocumentLibraryName=folderName;
+        (payloadForFolderMaster as any).DocumentLibraryName=folderName.trim();
         //  (payloadForFolderMaster as any).FolderPath=`/sites/IntranetUAT/${OthProps.Entity}/${folderName}`;
-         (payloadForFolderMaster as any).FolderPath=`/sites/AlRostmanispfx2/${OthProps.Entity}/${folderName}`;
+        //  (payloadForFolderMaster as any).FolderPath=`/sites/AlRostmanispfx2/${OthProps.Entity}/${folderName}`;
+         (payloadForFolderMaster as any).FolderPath=`${locationPath}/${OthProps.Entity}/${folderName.trim()}`;
         //  (payloadForFolderMaster as any).FolderPath=`/sites/AlRostmani/${OthProps.Entity}/${folderName}`;
         (payloadForFolderMaster as any).IsLibrary=true;
         (payloadForFolderMaster as any).IsActive=false;
@@ -583,16 +671,19 @@ const CreateFolder: React.FC<CreateFolderProps> = ({
         if(OthProps.IsFolderDeligationUser === "true"){
           (payloadForFolderMaster as any).IsFolderDeligation=true;
         }
+        if(OthProps.IsExternal === 'true'){
+          (payloadForFolderMaster as any).External=true;
+        }
       }else{
         (payloadForFolderMaster as any).DocumentLibraryName=OthProps.DocumentLibrary;
-        (payloadForFolderMaster as any).FolderPath=`${OthProps.folderpath}/${folderName}`;
+        (payloadForFolderMaster as any).FolderPath=`${OthProps.folderpath}/${folderName.trim()}`;
         (payloadForFolderMaster as any).IsFolder=true;
         (payloadForFolderMaster as any).IsActive=true;
 
         if(OthProps.Folder ===  ""){
-            (payloadForFolderMaster as any).FolderName=folderName;
+            (payloadForFolderMaster as any).FolderName=folderName.trim();
         }else{
-            (payloadForFolderMaster as any).FolderName=folderName;
+            (payloadForFolderMaster as any).FolderName=folderName.trim();
             (payloadForFolderMaster as any).ParentFolderId=OthProps.Folder;
             
         }
@@ -604,6 +695,9 @@ const CreateFolder: React.FC<CreateFolderProps> = ({
 
         if(OthProps.IsFolderDeligationUser === "true"){
           (payloadForFolderMaster as any).IsFolderDeligation=true;
+        }
+        if(OthProps.IsExternal === 'true'){
+          (payloadForFolderMaster as any).External=true;
         }
       }
 
@@ -630,7 +724,7 @@ const CreateFolder: React.FC<CreateFolderProps> = ({
           
             console.log("Create Folder Inside this Document Library -",OthProps.DocumentLibraryName);
             const {web}=await sp.site.openWebById(OthProps.siteID);
-            const folderAddResult = await web.folders.addUsingPath(`${OthProps.folderpath}/${folderName}`);
+            const folderAddResult = await web.folders.addUsingPath(`${OthProps.folderpath}/${folderName.trim()}`);
             console.log("Folder created successfully -",folderAddResult);
           } catch (error) {
             console.log("Error In creating Folder Inside the Document Library",error);
@@ -644,7 +738,7 @@ const CreateFolder: React.FC<CreateFolderProps> = ({
 
             let payloadForFolderPermissionMaster={
               SiteName:OthProps.Entity,
-              DocumentLibraryName:folderName,
+              DocumentLibraryName:folderName.trim(),
               CurrentUser:currentUserEmailRef.current,
             }
 
@@ -652,7 +746,7 @@ const CreateFolder: React.FC<CreateFolderProps> = ({
 
               payloadForFolderPermissionMaster={
                 SiteName:OthProps.Entity,
-                DocumentLibraryName:folderName,
+                DocumentLibraryName:folderName.trim(),
                 CurrentUser:currentUserEmailRef.current,
   
               }
@@ -704,7 +798,7 @@ const CreateFolder: React.FC<CreateFolderProps> = ({
           console.log("Add the Columns when create document library");
           const payloadForPreviewFormMaster={
             SiteName:OthProps.Entity,
-            DocumentLibraryName:folderName,
+            DocumentLibraryName:folderName.trim(),
             IsRequired:true,
             AddorRemoveThisColumn:"Add To Library",
             IsInProgress:true
@@ -727,7 +821,7 @@ const CreateFolder: React.FC<CreateFolderProps> = ({
 
           const payload={
             SiteName:OthProps.Entity,
-            DocumentLibraryName:folderName,
+            DocumentLibraryName:folderName.trim(),
             IsDocumentLibrary:true,
             IsPrivate:optionSelectedForPrivacy,
             IsHardDelete:false,
@@ -736,17 +830,31 @@ const CreateFolder: React.FC<CreateFolderProps> = ({
           console.log("payload for DMSPreviewFormField for IsDocumentLibrary",payload)
           const addedItem = await sp.web.lists.getByTitle("DMSPreviewFormMaster").items.add(payload);
           console.log("Item added successfully in the DMSPreviewFormField for IsDocumentLibrary", addedItem);
+          
+          if(formFields.length > 0){
+            if(formFields[0].fieldName !== '' && formFields[0].selectField !== ''){
+              formFields.forEach(async(field)=>{
+                // type.replace(/\s+/g, '').toLowerCase();
+                    (payloadForPreviewFormMaster as any).ColumnName=field.fieldName.replace(/\s+/g,'');
+                    (payloadForPreviewFormMaster as any).ColumnType=field.selectField
+                    console.log("Call the Api with this payload",payloadForPreviewFormMaster)
+    
+                    const addedItem = await sp.web.lists.getByTitle("DMSPreviewFormMaster").items.add(payloadForPreviewFormMaster);
+                    console.log("Item added successfully in the DMSPreviewFormField", addedItem);
+                    
+              })
+            }
+          }
+          // formFields.forEach(async(field)=>{
+          //   // type.replace(/\s+/g, '').toLowerCase();
+          //       (payloadForPreviewFormMaster as any).ColumnName=field.fieldName.replace(/\s+/g,'');
+          //       (payloadForPreviewFormMaster as any).ColumnType=field.selectField
+          //       console.log("Call the Api with this payload",payloadForPreviewFormMaster)
 
-          formFields.forEach(async(field)=>{
-            // type.replace(/\s+/g, '').toLowerCase();
-                (payloadForPreviewFormMaster as any).ColumnName=field.fieldName.replace(/\s+/g,'');
-                (payloadForPreviewFormMaster as any).ColumnType=field.selectField
-                console.log("Call the Api with this payload",payloadForPreviewFormMaster)
-
-                const addedItem = await sp.web.lists.getByTitle("DMSPreviewFormMaster").items.add(payloadForPreviewFormMaster);
-                console.log("Item added successfully in the DMSPreviewFormField", addedItem);
+          //       const addedItem = await sp.web.lists.getByTitle("DMSPreviewFormMaster").items.add(payloadForPreviewFormMaster);
+          //       console.log("Item added successfully in the DMSPreviewFormField", addedItem);
                 
-          })
+          // })
     }
 
     // new code  creating payload for DMSFolderPrivacy and add the data
@@ -761,10 +869,10 @@ const CreateFolder: React.FC<CreateFolderProps> = ({
             // DocumentLibraryName:folderName
           }
           if(OthProps.DocumentLibrary === ""){
-            (payloadForDMSFolderPrivacy as any).DocumentLibraryName=folderName;
+            (payloadForDMSFolderPrivacy as any).DocumentLibraryName=folderName.trim();
           }else{
             (payloadForDMSFolderPrivacy as any).DocumentLibraryName=OthProps.DocumentLibrary;
-            (payloadForDMSFolderPrivacy as any).FolderName=folderName;
+            (payloadForDMSFolderPrivacy as any).FolderName=folderName.trim();
           }
 
           if(folderPrivacy === "private"){
@@ -821,12 +929,13 @@ const CreateFolder: React.FC<CreateFolderProps> = ({
           Status:'Pending',
           SubmitStatus:'Submitted'
         }
-
+        
         if(OthProps.DocumentLibrary === ""){
-          (payloadForFolderDelegation as any).DocumentLibraryName=folderName;
+          (payloadForFolderDelegation as any).DocumentLibraryName=folderName.trim();
           //  (payloadForFolderDelegation as any).FolderPath=`/sites/IntranetUAT/${OthProps.Entity}/${folderName}`;
-           (payloadForFolderMaster as any).FolderPath=`/sites/AlRostmanispfx2/${OthProps.Entity}/${folderName}`;
+          //  (payloadForFolderDelegation as any).FolderPath=`/sites/AlRostmanispfx2/${OthProps.Entity}/${folderName}`;
           //  (payloadForFolderDelegation as any).FolderPath=`/sites/AlRostmani/${OthProps.Entity}/${folderName}`;
+           (payloadForFolderDelegation as any).FolderPath=`${locationPath}/${OthProps.Entity}/${folderName.trim()}`;
           (payloadForFolderDelegation as any).IsLibrary=true;
           // (payloadForFolderDelegation as any).IsActive=false;
           if(folderPrivacy === "private"){
@@ -844,14 +953,14 @@ const CreateFolder: React.FC<CreateFolderProps> = ({
           }
         }else{
           (payloadForFolderDelegation as any).DocumentLibraryName=OthProps.DocumentLibrary;
-          (payloadForFolderDelegation as any).FolderPath=`${OthProps.folderpath}/${folderName}`;
+          (payloadForFolderDelegation as any).FolderPath=`${OthProps.folderpath}/${folderName.trim()}`;
           (payloadForFolderDelegation as any).IsFolder=true;
           // (payloadForFolderDelegation as any).IsActive=true;
   
           if(OthProps.Folder ===  ""){
-              (payloadForFolderDelegation as any).FolderName=folderName;
+              (payloadForFolderDelegation as any).FolderName=folderName.trim();
           }else{
-              (payloadForFolderDelegation as any).FolderName=folderName;
+              (payloadForFolderDelegation as any).FolderName=folderName.trim();
               (payloadForFolderDelegation as any).ParentFolderId=OthProps.Folder;
               
           }
@@ -886,9 +995,8 @@ const CreateFolder: React.FC<CreateFolderProps> = ({
         title: "Folder Created Successfully",
         text: "Folder Created Successfully. It will reflect after a few seconds as we set up everything for the folder.",
         icon: "success",
-        showCancelButton: true,
-        confirmButtonText: 'Yes',
-        cancelButtonText: 'No'
+        // showCancelButton: true,
+        confirmButtonText: 'OK',
       }).then((result) => {
         if (result.isConfirmed) {
           location.reload(); // This will reload the page

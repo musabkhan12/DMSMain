@@ -554,19 +554,27 @@ a:hover
 
 
 /*Edit pop Css*/
+.blur-backround{
+  width: 600px;
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+}
 .edit-popup {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 50%;
-  max-width: 600px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  padding: 20px;
+
+  width: 100%;
+
+top: 0;
   z-index: 99999;
-  min-width:60%;
+  background: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  height: 100%;  
+  display: flex
+  ;
+      justify-content: center;
+      align-items: center;
+  
 }
  
 /* Styling for form groups (Field name and type) */
@@ -620,17 +628,17 @@ a:hover
  
 /* Buttons (Save and Cancel) */
 .edit-popup button {
-  padding: 10px 20px;
+  padding: 6px 20px;
   margin-top: 0px;
   background-color: #4CAF50;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
   float:right;
 }
- 
+.edit-popup  a{float: right;}
 .edit-popup button:hover {
   background-color: #45a049;
 }

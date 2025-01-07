@@ -111,20 +111,98 @@ const ManageFolderPermission : React.FC<ManageFolderPermissionProps> = ({
     console.log(currentUserEmailRef.current ,"my current id")
     const fetchUsers = async () => {
       try {
-        // start
-        const siteContext = await sp.site.openWebById(OthProps.SiteID);
-        const user0 = await siteContext.web.siteUsers();
+        if(OthProps.externalFolder === "true"){
+          const user0 = await sp.web.siteUsers();
+          const user1 = await sp.web.siteGroups();
+          const groupsArray=user1.map((user)=>(
+            {
+            PrincipalType:user.PrincipalType,
+            userId:user.Id,
+            value: user.Title,
+            label: user.Title,
+            email: user.Title,
+            }
+          ))
+          const combineUsersArray=user0.map((user)=>(
+                {
+                userId:user.Id,
+                value: user.Title,
+                label: user.Title,
+                email: user.Email,
+            }
+          ))
+          let resultArray =[...combineUsersArray, ...groupsArray];
+          console.log("resultArray --->",resultArray)
+          setUsers(resultArray);
+        }else{
+        //   const siteContext = await sp.site.openWebById(OthProps.SiteID);
+        //   const user0 = await siteContext.web.siteUsers();
+        //   const combineUsersArray=user0.map((user)=>(
+        //       {
+        //       userId:user.Id,
+        //       value: user.Title,
+        //       label: user.Title,
+        //       email: user.Email,
+        //   }
+        // ))
+        // setUsers(combineUsersArray);
+        // console.log("Sub site users",combineUsersArray);
+        // fetch the data from site Gropus
+        const [
+          users,
+          users1,
+          users2,
+          users3,
+          users4,
+          users5,
+          users6,
+          users7
+        ] = await Promise.all([
+          sp.web.siteGroups.getByName(`${OthProps.SiteTitle}_Read`).users(),
+          sp.web.siteGroups.getByName(`${OthProps.SiteTitle}_Initiator`).users(),
+          sp.web.siteGroups.getByName(`${OthProps.SiteTitle}_Contribute`).users(),
+          sp.web.siteGroups.getByName(`${OthProps.SiteTitle}_Admin`).users(),
+          sp.web.siteGroups.getByName(`${OthProps.SiteTitle}_View`).users(),
+          sp.web.siteGroups.getByName(`${OthProps.SiteTitle}_AllUsers`).users(),
+          sp.web.siteGroups.getByName(`${OthProps.SiteTitle}_Approval`).users(),
+          sp.web.siteGroups.getByName(`DMSSuper_Admin`).users(),
+        ]);
 
-        const combineUsersArray=user0.map((user)=>(
-              {
-              userId:user.Id,
-              value: user.Title,
-              label: user.Title,
-              email: user.Email,
+        const combineArray = [
+          ...(users || []),
+          ...(users1 || []),
+          ...(users2 || []),
+          ...(users3 || []),
+          ...(users4 || []),
+          ...(users5 || []),
+          ...(users6 || []),
+          ...(users7 || []),
+        ];
+        setUsers(
+          combineArray.map((user) => ( 
+          {
+            userId:user.Id,
+            value: user.Title,
+            label: user.Title,
+            email: user.Email,
           }
         ))
-        setUsers(combineUsersArray);
-        console.log("Sub site users",combineUsersArray);
+        );
+        console.log("combineArray", combineArray);
+        }
+        // start
+        // const siteContext = await sp.site.openWebById(OthProps.SiteID);
+        // const user0 = await siteContext.web.siteUsers();
+        // const combineUsersArray=user0.map((user)=>(
+        //       {
+        //       userId:user.Id,
+        //       value: user.Title,
+        //       label: user.Title,
+        //       email: user.Email,
+        //   }
+        // ))
+        // setUsers(combineUsersArray);
+        // console.log("Sub site users",combineUsersArray);
         // const user0 = await sp.web.siteUsers();
         // const [
         //   users,
@@ -529,7 +607,11 @@ const ManageFolderPermission : React.FC<ManageFolderPermissionProps> = ({
                   await securableObject.breakRoleInheritance(true); // First `true` copies permissions, second `true` clears unique assignments
               }
           }
-
+          // t222_Admin
+          // const roleDefinition = await web.roleDefinitions.getByName('Edit')();
+          // const roleDefinitionId = roleDefinition.Id;
+          // const group = await sp.web.siteGroups.getByName('t222_Admin')();
+          // await securableObject.roleAssignments.add(group.Id, roleDefinitionId);
           // Iterate through filteredArray and add role assignments
           rowsForPermission.forEach(async(row:any)=>{
               try {
@@ -954,7 +1036,7 @@ const ManageFolderPermission : React.FC<ManageFolderPermissionProps> = ({
                             <thead>
                             <tr>
                                 <th style={{minWidth:'55px', maxWidth:'55px'}}>S.No.</th>
-                                <th>User</th>
+                                <th>User/Groups</th>
                                 {/* <th className={styles.tabledept}>Email</th> */}
                                 <th >Permisson</th>
                                 <th style={{minWidth:'75px', maxWidth:'75px'}}>Action</th>
