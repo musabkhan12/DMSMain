@@ -79,6 +79,9 @@ const HorizontalNavbar = ({ _context, siteUrl }: any) => {
   const notref = useRef(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   let showdropdown:boolean = false;
+
+  const dmssiteUrl = window.location.origin;
+  let locationPath=window.location.pathname.match(/\/sites\/[^\/]+/)[0];
   function groupByFn(array: any, keyGetter: any) {
     return array.reduce((result: any, currentItem: any) => {
       const key = keyGetter(currentItem);
@@ -374,7 +377,7 @@ const HorizontalNavbar = ({ _context, siteUrl }: any) => {
               onClick={(e) => {
                 e.stopPropagation(); // Prevent input's onClick
                 window.open(
-                  "https://alrostamanigroupae.sharepoint.com/sites/IntranetUAT/SitePages/DMSAdvanceSearch.aspx",
+                  `${dmssiteUrl}${locationPath}/SitePages/DMSAdvanceSearch.aspx`,
                   "_blank"
                 );
               }}

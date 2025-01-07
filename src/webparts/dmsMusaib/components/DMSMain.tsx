@@ -10362,6 +10362,11 @@ FilesItems.forEach(async (fileItem, index) => {
        <li onclick="Download('${file.FileUID}','${file.SiteID}','${file.ID}' , '${file.FileMasterList}', '${file.FilePreviewURL}')">
          <img src=${downloadicon} alt="Download File"/> Download File
        </li>
+          ${file.Status === "Rework" ? `
+      <li onclick="rework('${file.FileUID}', '${file.SiteID}','${file?.DocumentLibraryName}','${file?.SiteName}','${file.CurrentFolderPath}/${file.FileName}')">
+
+           <img src=${editIcon} alt="Edit File"/> Edit File
+       </li>` : ''}
 
   </ul>
     `;
