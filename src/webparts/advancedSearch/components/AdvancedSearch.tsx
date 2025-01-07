@@ -102,23 +102,23 @@ const AdvancedSearch: React.FC<IAdvancedSearchProps> = (props) => {
             
             <div className="content-page">
             <HorizontalNavbar _context={sp}  siteUrl={props.siteUrl}/>
-                <div className="content" style={{ marginLeft: `${!useHide ? '240px' : '80px'}`, marginTop: '0.8rem' }}>
+                <div className="content" style={{ marginLeft: `${!useHide ? '80px' : '230px'}`, marginTop: '1.5rem' }}>
                     <section className='container-fluid'>
-                        <header className="bg-light p-3">
-                            <h1>Search</h1>
+                        <header className="p-3 pb-0">
+                            {/* <h1 style={{fontSize:'20px', fontWeight:'600'}} className='text-dark'>Search</h1> */}
                             <form>
                                 <div className="input-group">
-                                    <input type="search" className="form-control" placeholder="Search..." onChange={searchTextChangeHandler} />
-                                    <button className="btn btn-primary" type="button" onClick={searchClickHandler}>Search</button>
+                                    <input style={{padding:'.75rem .75rem'}} type="Search Files.." className="form-control" placeholder="Search Files.." onChange={searchTextChangeHandler} />
+                                    <button style={{fontSize:'1rem'}} className="btn btn-primary" type="button" onClick={searchClickHandler}>Advance Search</button>
                                 </div>
                             </form>
                         </header>
-                        <section>
+                        <section style={{float:'left', width:'100%'}} className='mt-3'>
                             <DateRangeFilter onFilterChange={(e) => handleDateTimeFilter(e)}></DateRangeFilter>
                         </section>
-                        <main className="container mt-3">
-                            <section className="row">
-                                <section className="col-4">
+                        <main className="mt-3 p-3 pb-0">
+                            <section style={{background:"#fff",border:'1px solid #1fb0e5', borderRadius:'20px'}} className="row">
+                                <section className="col-12">
                                     <DMSEntitySearchTreeView context={props.context} onFieldSelect={(fld) => {
                                         let selfld = [...searchQueryRefiners];
                                         selfld.push(fld);
@@ -126,7 +126,7 @@ const AdvancedSearch: React.FC<IAdvancedSearchProps> = (props) => {
                                         runSearch(searchText, searchFilter, searchPath, selfld, searchRefinerFilters);
                                     }}></DMSEntitySearchTreeView>
                                     <div>
-                                        <h5>Refiners</h5>
+                                        <h5 className='font-16 text-dark p-3 pt-0 mb-3'>Refiners</h5>
                                         {searchRefiners?.map(refiner => (
                                             <div key={refiner.field} className="card mb-3 p-2">
                                                 <h6>{refiner.field}</h6>
@@ -150,7 +150,7 @@ const AdvancedSearch: React.FC<IAdvancedSearchProps> = (props) => {
                                         ))}
                                     </div>
                                 </section>
-                                <section className="col-8">
+                                <section className="col-12">
                                     {searchResult.map(res => (
                                         <div className="col mb-4" key={res.Path}>
                                             <div className="card h-100">

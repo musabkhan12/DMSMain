@@ -120,7 +120,7 @@ export const DMSEntitySearchTreeView: React.FC<ITreeViewProps> = (props:ITreeVie
   };
 
   return (
-    <div className="container">
+    <div className="container p-3">
       {treeData.map((site, siteIndex) => (
         // <div key={site.key} className="form-check">
         <div key={site.text} className="form-check">
@@ -130,7 +130,9 @@ export const DMSEntitySearchTreeView: React.FC<ITreeViewProps> = (props:ITreeVie
             checked={site.checked}
             onChange={() => handleSiteCheck(siteIndex)}
           />
+       
           <label className="form-check-label">{site.text}</label>
+          <div className='newline'>
           {site.children && site.children.map((library, libraryIndex) => (
             <div key={library.key} className="ms-3 form-check">
               <input
@@ -148,9 +150,10 @@ export const DMSEntitySearchTreeView: React.FC<ITreeViewProps> = (props:ITreeVie
               ))}
             </div>
           ))}
-        </div>
-      ))}     
-      <div className="mb-3">
+        </div></div>
+      ))}   
+      <div className='row'>  
+      <div className="mt-3 mb-3 col-sm-4">
         <label className="form-label">Fields</label>
         <select id='FieldSelectDropdown' className="form-select" onChange={handleFieldSelect} value={selectedField || ''}>
           {fields.map(field => (
@@ -158,7 +161,9 @@ export const DMSEntitySearchTreeView: React.FC<ITreeViewProps> = (props:ITreeVie
           ))}
         </select>
       </div>
-      <button className="btn btn-primary" onClick={handleButtonClick}>Submit Field</button>
+      <div className="mt-3 mb-3 col-sm-4">
+      <button style={{marginTop:'27px',padding:'8px 12px'}} className="btn btn-primary mb-0" onClick={handleButtonClick}>Submit Field</button></div>
+    </div>
     </div>
   );
 };
