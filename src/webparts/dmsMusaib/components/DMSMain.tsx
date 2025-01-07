@@ -9118,14 +9118,7 @@ window.renameFolder=(siteName:any,folderName:any,itemId:any,siteId:any)=>{
      const popup = document.createElement("div");
      popup.id = "rename-popup";
      popup.style.position = "fixed";
-     popup.style.top = "50%";
-     popup.style.left = "50%";
-     popup.style.transform = "translate(-50%, -50%)";
-     popup.style.padding = "20px";
-     popup.style.backgroundColor = "#fff";
-     popup.style.boxShadow = "0px 4px 6px rgba(0,0,0,0.1)";
-     popup.style.borderRadius = "8px";
-     popup.style.zIndex = "1000";
+    
 
      // Create a wrapper div
     const wrapper = document.createElement("div");
@@ -9144,7 +9137,11 @@ window.renameFolder=(siteName:any,folderName:any,itemId:any,siteId:any)=>{
      // Add the heading
      const heading = document.createElement("h3");
      heading.innerText = "Rename Folder";
-     heading.style.marginBottom = "15px";
+     heading.style.marginBottom = "0px";
+     heading.style.fontSize = "18px";
+     heading.style.borderBottom = "1px solid #ccc";
+     heading.style.paddingBottom = "15px";
+     heading.style.fontWeight = "bold";
     //  popup.appendChild(heading);
     wrapper.appendChild(heading);
     
@@ -9152,17 +9149,19 @@ window.renameFolder=(siteName:any,folderName:any,itemId:any,siteId:any)=>{
      // Add a close button
      const closeButton = document.createElement("span");
      closeButton.innerText = "×";
-     closeButton.style.position = "absolute";
-     closeButton.style.top = "10px";
-     closeButton.style.right = "10px";
+     closeButton.style.position = "relative";
+     closeButton.style.top = "-42px";
+     closeButton.style.right = "0px";
      closeButton.style.cursor = "pointer";
      closeButton.style.fontSize = "18px";
      closeButton.style.border = "1px solid #ccc";
-     closeButton.style.color = "#333";
+     closeButton.style.color = "#666";
      closeButton.style.minWidth = "30px";
      closeButton.style.height = "30px";
      closeButton.style.textAlign = "center";
      closeButton.style.borderRadius = "1000px";
+     closeButton.style.float = "right";
+     closeButton.style.lineHeight = "27px";
      closeButton.onclick = () => popup.remove();
      wrapper.appendChild(closeButton);
     //  popup.appendChild(closeButton);
@@ -9243,16 +9242,7 @@ window.renameColumn=async(siteName:string,documentLibraryName:string)=>{
   popup.id = "renamePopup";
   popup.style.cssText = `
     position: fixed; 
-    top: 50%; 
-    left: 50%; 
-    transform: translate(-50%, -50%); 
-    background: white; 
-    padding: 20px; 
-    border: 1px solid #ccc; 
-    border-radius: 8px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); 
-    z-index: 1000; 
-    width: 800px;
+    
   `;
 
   const wrapper = document.createElement("div");
@@ -9264,19 +9254,7 @@ window.renameColumn=async(siteName:string,documentLibraryName:string)=>{
   // heading.style.marginBottom = "15px";
   // wrapper.appendChild(heading);
   // Add the close button
-  const closeButton = document.createElement("span");
-  closeButton.innerHTML = "&times;";
-  closeButton.style.cssText = `
-    position: absolute; 
-    top: 10px; 
-    right: 15px; 
-    font-size: 18px; 
-    font-weight: bold; 
-    color: #333; 
-    cursor: pointer; border:1px solid #ccc; line-height:30px;
-    border-radius:1000px;min-width:30px;height:30px; text-align:center;
-  `;
-  closeButton.onclick = () => document.body.removeChild(popup);
+ 
 
   // Generate the form dynamically
   const formContent = existingColumns
@@ -9317,12 +9295,24 @@ window.renameColumn=async(siteName:string,documentLibraryName:string)=>{
   //     </div>
   //   </form>
   // `;
-
+  const closeButton = document.createElement("span");
+  closeButton.innerHTML = "&times;";
+  closeButton.style.cssText = `
+    position: absolute; 
+    top: 10px; 
+    right: 15px; 
+    font-size: 18px; 
+    font-weight: bold; 
+    color: #333; 
+    cursor: pointer; border:1px solid #ccc; line-height:30px;
+    border-radius:1000px;min-width:30px;height:30px; text-align:center;
+  `;
+  closeButton.onclick = () => document.body.removeChild(popup);
   wrapper.innerHTML = `
-  <h3 style="margin-top: 0; text-align: center; font-size: 18px;">Rename Meta Columns</h3>
+  <h3 style="margin-top: 0; padding-bottom:15px;margin-bottom:15px; border-bottom:1px solid #ccc; text-align: center; font-size: 18px;">Rename Meta Columns</h3>
   <form id="renameForm">
     ${formContent}
-     <div style="margin-top: 20px; text-align: right;">
+     <div style="margin-top: 0px; text-align: right;">
       <button type="button" id="cancelBtn" style="
         background: #ccc; 
         border: none; 
@@ -11010,9 +11000,12 @@ window.editFile = async (siteName: string, documentLibraryName:string ) => {
   closeButton.className = 'close-button';
   closeButton.style.cursor = 'pointer';
   closeButton.style.fontSize = '24px';
-  closeButton.style.position = 'absolute';
-  closeButton.style.top = '10px';
-  closeButton.style.right = '15px';
+  closeButton.style.position = 'relative';
+  closeButton.style.top = '-8px';
+  closeButton.style.right = '0px';
+  closeButton.style.color = '#666';
+  closeButton.style.zIndex = '9999';
+
 
   // Append close button to popup
   // popupContainer.appendChild(closeButton);
@@ -11021,11 +11014,13 @@ window.editFile = async (siteName: string, documentLibraryName:string ) => {
   // Add heading
   const heading = document.createElement("h3");
   heading.innerText = "Add Meta Columns";
-  heading.style.position = "absolute";
-  heading.style.top = "10px";
-  heading.style.left = "15px";
+  heading.style.position = "relative";
+  heading.style.top = "0px";
+  heading.style.left = "0px";
   heading.style.margin = "0";
   heading.style.fontSize = "18px";
+  heading.style.borderBottom = "1px solid #ccc";
+  heading.style.paddingBottom = "15px";
   heading.style.fontWeight = "bold";
   wrapper.appendChild(heading);
 
@@ -11042,6 +11037,7 @@ window.editFile = async (siteName: string, documentLibraryName:string ) => {
         <label>Field Type</label>
         <input type="text" class="form-control" value="${col.ColumnType}" disabled />
       </div>
+       
     </div>
   `).join('');
 
@@ -11061,7 +11057,7 @@ window.editFile = async (siteName: string, documentLibraryName:string ) => {
   // Add event listener for "+" button to add new editable fields
   addFieldButton.addEventListener('click', () => {
     const newFieldHTML = `
-      <div class="form-group row">
+      <div class="form-group">
         <div class="col-md-5">
           <label>Field Name</label>
           <input type="text" class="form-control" placeholder="Enter new field name" />
@@ -11078,7 +11074,7 @@ window.editFile = async (siteName: string, documentLibraryName:string ) => {
           </select>
         </div>
       <div class="col-md-2">
-          <img class="delete-column"  src="${require("../assets/delete.png")}" alt="add" style="width: 40px; margin-top:25px; cursor:pointer;" />
+          <img class="delete-column"  src="${require("../assets/del.png")}" alt="add" style="width: 40px; margin-top:25px; cursor:pointer;" />
         </div>
       </div>
     `;
