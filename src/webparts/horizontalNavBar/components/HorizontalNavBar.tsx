@@ -378,6 +378,7 @@ const HorizontalNavbar = ({ _context, siteUrl }: any) => {
                 e.stopPropagation(); // Prevent input's onClick
                 window.open(
                   `${dmssiteUrl}${locationPath}/SitePages/DMSAdvanceSearch.aspx`,
+                  `${dmssiteUrl}${locationPath}/SitePages/DMSAdvanceSearch.aspx`,
                   "_blank"
                 );
               }}

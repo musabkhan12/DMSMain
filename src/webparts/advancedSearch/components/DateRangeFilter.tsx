@@ -43,11 +43,15 @@ export const DateRangeFilter: React.FC<IDateRangeFilterProps> = ({ onFilterChang
 
 
     return (
-        <div className="container mt-3">
-            <h5>Filter by Published Date</h5>
-            <div className="row g-3">
-                <div className="col-md-6">
-                    <label htmlFor="startDate" className="form-label">Start Date</label>
+        <div  className="mt-3 p-3 pt-0">
+            
+            <div style={{background:"#fff",border:'1px solid #1fb0e5', borderRadius:'20px'}} className="row g-3">
+            <div className="col-md-3">
+            <h5 style={{fontWeight:'600'}} className='mb-2 mt-2 font-16 text-center'>Filter by Published Date</h5>
+                </div>
+                <div className='col-md-1'><label htmlFor="startDate" className="form-label mb-0 mt-2">Start Date</label></div>
+                <div className="col-md-2">
+                    
                     <input
                         type="date"
                         id="startDate"
@@ -59,8 +63,9 @@ export const DateRangeFilter: React.FC<IDateRangeFilterProps> = ({ onFilterChang
                         }}
                     />
                 </div>
-                <div className="col-md-6">
-                    <label htmlFor="endDate" className="form-label">End Date</label>
+                <div className="col-md-1">  <label htmlFor="endDate" className="form-label mb-0 mt-2">End Date</label> </div>
+                <div className="col-md-2">
+                   
                     <input
                         type="date"
                         id="endDate"
@@ -72,8 +77,8 @@ export const DateRangeFilter: React.FC<IDateRangeFilterProps> = ({ onFilterChang
                         }}
                     />
                 </div>
-                <div className="col-md-12 mt-3">
-                    <button className="btn btn-primary" onClick={handleApply}>
+                <div className="col-md-2 mt-3 mb-3">
+                    <button style={{marginTop:'0rem',fontSize:'1rem',padding:'6px 20px', minWidth:'auto'}} className="btn btn-primary" onClick={handleApply}>
                         Apply
                     </button>
                 </div>
