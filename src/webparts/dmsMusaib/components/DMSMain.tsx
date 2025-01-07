@@ -1066,6 +1066,7 @@ const myrequestbuttonclick =()=>{
                   console.log(`Is member of ${currentEntity}_Admin:`, isMemberOfGroup);
                   // console.log(`User is a member of the group: ${currentEntity}_Admin`);
                   if (isMemberOfGroup || isMemberOfSuperAdmin) {
+                    IsFolderDeligationUser=false;
                   console.log(`User is a member of the group: ${currentEntity}_Admin`);
                   if(createFileButton){
                     createFileButton.style.display=  "none";
@@ -1555,6 +1556,7 @@ const myrequestbuttonclick =()=>{
               console.log(`Is member of ${currentEntity}_Admin:`, isMemberOfGroup);
               // console.log(`User is a member of the group: ${currentEntity}_Admin`);
               if (isMemberOfGroup || isMemberOfSuperAdmin) {
+                IsFolderDeligationUser=false;
               console.log(`User is a member of the group: ${currentEntity}_Admin`);
               if(createFileButton){
                 createFileButton.style.display=  "none";
@@ -1625,6 +1627,7 @@ const myrequestbuttonclick =()=>{
                 console.log(`Is member of ${currentEntity}_Admin:`, isMemberOfGroup);
                 // console.log(`User is a member of the group: ${currentEntity}_Admin`);
                 if (isMemberOfGroup || isMemberOfSuperAdmin) {
+                  IsFolderDeligationUser=false;
                 console.log(`User is a member of the group: ${currentEntity}_Admin`);
                 if(createFileButton){
                   createFileButton.style.display=  "none";
@@ -1864,6 +1867,7 @@ const myrequestbuttonclick =()=>{
                   console.log(`Is member of ${currentEntity}_Admin:`, isMemberOfGroup);
                   // console.log(`User is a member of the group: ${currentEntity}_Admin`);
                   if (isMemberOfGroup || isMemberOfSuperAdmin) {
+                    IsFolderDeligationUser=false;
                   console.log(`User is a member of the group: ${currentEntity}_Admin`);
                   if(createFileButton){
                     createFileButton.style.display=  "none";
@@ -1945,6 +1949,7 @@ const myrequestbuttonclick =()=>{
               console.log(`Is member of ${currentEntity}_Admin:`, isMemberOfGroup);
               // console.log(`User is a member of the group: ${currentEntity}_Admin`);
               if (isMemberOfGroup || isMemberOfSuperAdmin) {
+                IsFolderDeligationUser=false;
               console.log(`User is a member of the group: ${currentEntity}_Admin`);
               if(createFileButton){
                 createFileButton.style.display=  "none";
@@ -2519,70 +2524,6 @@ const myrequestbuttonclick =()=>{
   const getdoclibdata = async (FolderPath: any , siteID:any , docLibName:any) => {
     setlistorgriddata('');
     
-
-    // main code i shere 
-    // try {
-    //   // Get the file object
-    //   let filePath = '/sites/AlRostmani/TestHub/DL1/PermissonTest1.doc'
-    //   const siteid = "3f7babac-3bce-478c-aa2b-1f7df7ed177f"
-    //   const testidsub2 = await sp.site.openWebById(siteid);
-
-    //     const file = testidsub2.web.getFileByServerRelativePath(filePath);
-    //     const item = await file.getItem();  
-    //     const itemDetails = await item.select("Editor/ID", "Editor/Title", "Editor/Id" ,"*").expand("Editor")()
-
-    //     console.log("itemDetails",itemDetails)
-    //     console.log("file detail is",file)
-    //     // Fetch historical versions
-    //     const historicalVersions = await file.versions
-    //       .select(
-    //         "ID",
-    //         "CheckInComment",
-    //         "Created",
-    //         "CreatedBy/Title",
-    //         "CreatedBy/Id",
-    //         "CreatedBy/Name",
-    //         "IsCurrentVersion",
-    //         "Size",
-    //         "Url",
-    //         "VersionLabel"
-    //       )
-    //       .expand("CreatedBy")();
-    
-    //     // Fetch current version details
-    //     const currentFileDetails = await file
-    //       .select(
-    //         "Name",
-    //         "Length",
-
-    //       )
-    //       .expand("Author"  )();
-    //       let currentVersionofitem:any = currentFileDetails;
-    //      console.log("currentFileDetails",currentFileDetails)
-    //     // Map current file details into the same structure as versions
-    //     const currentVersion = {
-    //       ID: historicalVersions.length + 1, // Current version appears last
-    //       VersionLabel: `${historicalVersions.length + 1}.0`, // Example label
-    //       CheckInComment: "N/A", // No check-in comment for current version
-    //       Created: itemDetails.Created,
-    //       CreatedBy: {
-    //         Title: itemDetails?.Editor?.Title,
-    //         Id:  itemDetails?.Editor?.ID,
-    //       },
-    //       IsCurrentVersion: true,
-    //       Size: currentFileDetails.Length,
-    //       Url: filePath,
-    //     };
-    
-    //     // Combine current version with historical versions
-    //     const allVersions = [...historicalVersions, currentVersion];
-    
-    //     console.log("All File Versions (Including Current):", allVersions);
- 
-    //   } catch (error) {
-    //     console.error("Error fetching file versions:", error);
-    //     throw error;
-    //   }
     const noFileMessage = document.createElement("p");
     
     //  ismyrequordoclibforfilepreview = "getdoclibdata"
@@ -2875,17 +2816,37 @@ const myrequestbuttonclick =()=>{
     const currentUser = await sp.web.currentUser();
     const userGroups = await sp.web.siteUsers.getById(currentUser.Id).groups();
     const isMemberOfDeligation = userGroups.some(group => group.Title === `${currentEntity}_FolderDeligation`);
-    console.log("User is a member of deligation group",isMemberOfDeligation);
+    const isMemberOfGroup = userGroups.some(group => group.Title === `${currentEntity}_Admin`);
+    const isMemberOfSuperAdmin = userGroups.some(group => group.Title === `DMSSuper_Admin`);
+    console.log(`User is a member of ${currentEntity}_Deligation group`,isMemberOfDeligation);
+    console.log(`User is a member of ${currentEntity}_Admin group`,isMemberOfGroup);
+    console.log(`User is a member of ${currentEntity}_DMSSuperAdmin group`,isMemberOfSuperAdmin);
 
     const CreateFolder=document.getElementById("CreateFolder")
     const createFileButton=document.getElementById("createFileButton")
-    if(userPermissions.hasFullControl){
-      console.log(`Current User has full control on the library/Folder`);
+    if(isMemberOfSuperAdmin || isMemberOfGroup){
+      console.log(`Current User is  admin or super admin`);
+      IsFolderDeligationUser=false;
       if(createFileButton){
         createFileButton.style.display=  "block";
       }
       if(CreateFolder){
         CreateFolder.style.display="block";
+      }
+    }
+    else if(userPermissions.hasFullControl){
+      console.log(`Current User has full control on the library/Folder and user does not belong to admin or super admin group`);
+      if(createFileButton){
+        createFileButton.style.display=  "block";
+      }
+      if(CreateFolder){
+        CreateFolder.style.display="block";
+      }
+
+      if(isMemberOfDeligation){
+        IsFolderDeligationUser=true;
+      }else{
+        IsFolderDeligationUser=false;
       }
     }else if(userPermissions.hasContribute || userPermissions.hasEdit){
       console.log(`Current User has Contribute/Edit permission on the library/Folder`);
@@ -2893,6 +2854,14 @@ const myrequestbuttonclick =()=>{
         createFileButton.style.display=  "block";
       }
       if(CreateFolder){
+        CreateFolder.style.display="none";
+      }
+
+      if(isMemberOfDeligation){
+        IsFolderDeligationUser=true;
+        CreateFolder.style.display="block";
+      }else{
+        IsFolderDeligationUser=false;
         CreateFolder.style.display="none";
       }
     }else if(isMemberOfDeligation){
